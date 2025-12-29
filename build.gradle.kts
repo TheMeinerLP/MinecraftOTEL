@@ -40,6 +40,7 @@ version = "1.1.0"
 
 dependencies {
     compileOnly(libs.paper)
+    compileOnly(libs.velocity.api)
     implementation(libs.opentelemetry.api)
     compileOnly(libs.spark.api)
 }
@@ -63,6 +64,12 @@ tasks {
         archiveClassifier.set("")
         relocate("org.bstats", "net.onelitefeather.antiredstoneclockremastered.org.bstats")
         dependsOn(jar)
+    }
+
+    processResources {
+        filesMatching("velocity-plugin.json") {
+            expand("version" to project.version)
+        }
     }
     this.modrinth {
         dependsOn(shadowJar)

@@ -1,0 +1,56 @@
+package dev.themeinerlp.minecraftotel.velocity;
+
+import com.google.inject.Inject;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ProxyServer;
+import dev.themeinerlp.minecraftotel.velocity.service.VelocityTelemetryService;
+import java.nio.file.Path;
+import org.slf4j.Logger;
+
+/**
+ * Velocity entrypoint that wires the telemetry service into the proxy lifecycle.
+ */
+public final class MinecraftOTELVelocityPlugin {
+    private final ProxyServer proxyServer;
+    private final Logger logger;
+    private final Path dataDirectory;
+    private VelocityTelemetryService telemetryService;
+
+    @Inject
+    public MinecraftOTELVelocityPlugin(
+            ProxyServer proxyServer,
+            Logger logger,
+            @DataDirectory Path dataDirectory
+    ) {
+        this.proxyServer = proxyServer;
+        this.logger = logger;
+        this.dataDirectory = dataDirectory;
+    }
+
+    @Subscribe
+    public void onProxyInitialize(ProxyInitializeEvent event) {
+        telemetryService = new VelocityTelemetryService(
+                proxyServer,
+                logger,
+                dataDirectory,
+                resolveVersion()
+        );
+        telemetryService.start();
+    }
+
+    @Subscribe
+    public void onProxyShutdown(ProxyShutdownEvent event) {
+        if (telemetryService != null) {
+            telemetryService.stop();
+            telemetryService = null;
+        }
+    }
+
+    private String resolveVersion() {
+        String version = getClass().getPackage().getImplementationVersion();
+        return version == null ? "unknown" : version;
+    }
+}
