@@ -14,6 +14,9 @@ import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * Orchestrates sampling, listeners, and metrics for the Paper plugin.
+ */
 public final class PaperTelemetryService {
     private final JavaPlugin plugin;
     private final PluginConfig config;
@@ -22,12 +25,21 @@ public final class PaperTelemetryService {
     private ServerSampler sampler;
     private long lastBaselineMillis;
 
+    /**
+     * Creates a telemetry service bound to a plugin and configuration.
+     *
+     * @param plugin plugin instance
+     * @param config loaded configuration
+     */
     public PaperTelemetryService(JavaPlugin plugin, PluginConfig config) {
         this.plugin = plugin;
         this.config = config;
         this.state = new TelemetryState();
     }
 
+    /**
+     * Initializes listeners, metrics, and periodic sampling.
+     */
     public void start() {
         state.baselineInit(plugin.getServer());
         MetricsRegistry metrics = new MetricsRegistry(plugin, state);
@@ -72,6 +84,9 @@ public final class PaperTelemetryService {
         plugin.getLogger().info("Paper tick events enabled: " + config.enableTick);
     }
 
+    /**
+     * Stops sampling and unregisters listeners.
+     */
     public void stop() {
         if (tickDurationRecorder != null) {
             tickDurationRecorder.stop();
