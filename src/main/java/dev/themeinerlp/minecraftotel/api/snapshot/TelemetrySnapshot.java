@@ -1,4 +1,4 @@
-package dev.themeinerlp.minecraftotel.api;
+package dev.themeinerlp.minecraftotel.api.snapshot;
 
 import java.util.Map;
 
@@ -13,6 +13,9 @@ import java.util.Map;
  * @param msptP95Nullable p95 MSPT or null when unavailable
  * @param playersByServer players online per backend server (Velocity only)
  * @param registeredServers number of registered backend servers (Velocity only)
+ *
+ * @since 1.1.0
+ * @version 1.1.0
  */
 public record TelemetrySnapshot(
         long playersOnline,

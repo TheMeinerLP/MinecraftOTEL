@@ -1,14 +1,14 @@
 package dev.themeinerlp.minecraftotel.paper;
 
-import dev.themeinerlp.minecraftotel.api.MeterTelemetryCollector;
-import dev.themeinerlp.minecraftotel.api.SnapshotTelemetrySampler;
-import dev.themeinerlp.minecraftotel.api.TelemetryCollector;
-import dev.themeinerlp.minecraftotel.api.TelemetryListener;
-import dev.themeinerlp.minecraftotel.api.TelemetrySampler;
-import dev.themeinerlp.minecraftotel.api.TelemetryService;
-import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
-import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotBuilder;
-import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotSampler;
+import dev.themeinerlp.minecraftotel.api.collector.MeterTelemetryCollector;
+import dev.themeinerlp.minecraftotel.api.collector.TelemetryCollector;
+import dev.themeinerlp.minecraftotel.api.sampler.SnapshotTelemetrySampler;
+import dev.themeinerlp.minecraftotel.api.sampler.TelemetrySampler;
+import dev.themeinerlp.minecraftotel.api.service.TelemetryListener;
+import dev.themeinerlp.minecraftotel.api.service.TelemetryService;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotBuilder;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
 import dev.themeinerlp.minecraftotel.paper.listeners.ChunkCounterListener;
 import dev.themeinerlp.minecraftotel.paper.listeners.EntityCounterListener;

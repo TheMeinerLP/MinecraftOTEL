@@ -2,8 +2,8 @@ package dev.themeinerlp.minecraftotel.velocity.sampler;
 
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotBuilder;
-import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotSampler;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotBuilder;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.velocity.config.VelocityPluginConfig;
 import java.util.Collection;
 import java.util.HashMap;

@@ -1,10 +1,16 @@
-package dev.themeinerlp.minecraftotel.api;
+package dev.themeinerlp.minecraftotel.api.sampler;
 
+import dev.themeinerlp.minecraftotel.api.collector.TelemetryCollector;
+import dev.themeinerlp.minecraftotel.api.metrics.StandardMetrics;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 import io.opentelemetry.api.common.Attributes;
 import java.util.Map;
 
 /**
  * Emits standard MinecraftOTEL metrics from a TelemetrySnapshot.
+ *
+ * @since 1.1.0
+ * @version 1.1.0
  */
 public final class SnapshotTelemetrySampler implements TelemetrySampler {
     @Override

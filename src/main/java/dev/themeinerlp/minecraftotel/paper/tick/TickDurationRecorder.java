@@ -2,8 +2,8 @@ package dev.themeinerlp.minecraftotel.paper.tick;
 
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
-import dev.themeinerlp.minecraftotel.api.StandardMetrics;
-import dev.themeinerlp.minecraftotel.api.TelemetryCollector;
+import dev.themeinerlp.minecraftotel.api.collector.TelemetryCollector;
+import dev.themeinerlp.minecraftotel.api.metrics.StandardMetrics;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;

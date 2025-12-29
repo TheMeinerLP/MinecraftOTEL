@@ -1,7 +1,7 @@
 package dev.themeinerlp.minecraftotel.velocity.api;
 
-import dev.themeinerlp.minecraftotel.api.MinecraftOtelApi;
-import dev.themeinerlp.minecraftotel.api.TelemetryService;
+import dev.themeinerlp.minecraftotel.api.core.MinecraftOtelApi;
+import dev.themeinerlp.minecraftotel.api.service.TelemetryService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 

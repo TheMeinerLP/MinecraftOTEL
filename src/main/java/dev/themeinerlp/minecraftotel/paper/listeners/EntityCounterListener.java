@@ -2,8 +2,8 @@ package dev.themeinerlp.minecraftotel.paper.listeners;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
-import dev.themeinerlp.minecraftotel.api.StandardMetrics;
-import dev.themeinerlp.minecraftotel.api.TelemetryCollector;
+import dev.themeinerlp.minecraftotel.api.collector.TelemetryCollector;
+import dev.themeinerlp.minecraftotel.api.metrics.StandardMetrics;
 import io.opentelemetry.api.common.Attributes;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import org.bukkit.event.EventHandler;

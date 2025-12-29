@@ -1,7 +1,12 @@
-package dev.themeinerlp.minecraftotel.api;
+package dev.themeinerlp.minecraftotel.api.state;
+
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 
 /**
  * Common interface for storing and retrieving telemetry snapshots.
+ *
+ * @since 1.1.0
+ * @version 1.1.0
  */
 public interface TelemetryStateStore {
     /**

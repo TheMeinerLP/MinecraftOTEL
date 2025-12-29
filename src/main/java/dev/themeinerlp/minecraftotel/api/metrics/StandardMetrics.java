@@ -1,9 +1,12 @@
-package dev.themeinerlp.minecraftotel.api;
+package dev.themeinerlp.minecraftotel.api.metrics;
 
 import io.opentelemetry.api.common.AttributeKey;
 
 /**
  * Standard metric names, units, and attribute keys used by MinecraftOTEL.
+ *
+ * @since 1.1.0
+ * @version 1.1.0
  */
 public final class StandardMetrics {
     public static final String UNIT_COUNT = "1";

@@ -1,7 +1,7 @@
 package dev.themeinerlp.minecraftotel.paper;
 
-import dev.themeinerlp.minecraftotel.api.MinecraftOtelApi;
-import dev.themeinerlp.minecraftotel.api.MinecraftOtelApiProvider;
+import dev.themeinerlp.minecraftotel.api.core.MinecraftOtelApi;
+import dev.themeinerlp.minecraftotel.api.core.MinecraftOtelApiProvider;
 import dev.themeinerlp.minecraftotel.paper.api.PaperMinecraftOtelApi;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
 import org.bukkit.plugin.java.JavaPlugin;

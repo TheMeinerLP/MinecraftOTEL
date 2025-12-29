@@ -1,9 +1,12 @@
-package dev.themeinerlp.minecraftotel.api;
+package dev.themeinerlp.minecraftotel.api.snapshot;
 
 import java.util.Map;
 
 /**
  * Mutable builder for assembling a TelemetrySnapshot from multiple samplers.
+ *
+ * @since 1.1.0
+ * @version 1.1.0
  */
 public final class TelemetrySnapshotBuilder {
     private Long playersOnline;

@@ -1,4 +1,4 @@
-package dev.themeinerlp.minecraftotel.api;
+package dev.themeinerlp.minecraftotel.api.collector;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
@@ -11,6 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * TelemetryCollector backed by OpenTelemetry instruments.
+ *
+ * @since 1.1.0
+ * @version 1.1.0
  */
 public final class MeterTelemetryCollector implements TelemetryCollector {
     private final Meter meter;

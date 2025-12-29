@@ -1,9 +1,13 @@
-package dev.themeinerlp.minecraftotel.api;
+package dev.themeinerlp.minecraftotel.api.core;
 
+import dev.themeinerlp.minecraftotel.api.service.TelemetryService;
 import io.opentelemetry.api.metrics.Meter;
 
 /**
  * Public API for obtaining OpenTelemetry meters from MinecraftOTEL.
+ *
+ * @since 1.1.0
+ * @version 1.1.0
  */
 public interface MinecraftOtelApi {
     /**

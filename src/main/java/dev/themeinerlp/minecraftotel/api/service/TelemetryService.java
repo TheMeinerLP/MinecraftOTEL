@@ -1,7 +1,14 @@
-package dev.themeinerlp.minecraftotel.api;
+package dev.themeinerlp.minecraftotel.api.service;
+
+import dev.themeinerlp.minecraftotel.api.sampler.TelemetrySampler;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 
 /**
  * Common telemetry service contract for Paper and Velocity.
+ *
+ * @since 1.1.0
+ * @version 1.1.0
  */
 public interface TelemetryService {
     /**

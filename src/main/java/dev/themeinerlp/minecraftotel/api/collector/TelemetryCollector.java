@@ -1,9 +1,12 @@
-package dev.themeinerlp.minecraftotel.api;
+package dev.themeinerlp.minecraftotel.api.collector;
 
 import io.opentelemetry.api.common.Attributes;
 
 /**
  * Collector for turning telemetry samples into OpenTelemetry instruments.
+ *
+ * @since 1.1.0
+ * @version 1.1.0
  */
 public interface TelemetryCollector {
     /**

@@ -1,7 +1,7 @@
 package dev.themeinerlp.minecraftotel.paper.state;
 
-import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
-import dev.themeinerlp.minecraftotel.api.TelemetryStateStore;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.api.state.TelemetryStateStore;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

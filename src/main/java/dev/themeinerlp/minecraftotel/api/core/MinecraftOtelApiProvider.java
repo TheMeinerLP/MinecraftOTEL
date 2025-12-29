@@ -1,9 +1,12 @@
-package dev.themeinerlp.minecraftotel.api;
+package dev.themeinerlp.minecraftotel.api.core;
 
 import java.util.Optional;
 
 /**
  * Static access point for the MinecraftOTEL API.
+ *
+ * @since 1.1.0
+ * @version 1.1.0
  */
 public final class MinecraftOtelApiProvider {
     private static volatile MinecraftOtelApi api;

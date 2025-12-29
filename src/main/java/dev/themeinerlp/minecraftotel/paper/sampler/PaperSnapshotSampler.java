@@ -1,7 +1,7 @@
 package dev.themeinerlp.minecraftotel.paper.sampler;
 
-import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotBuilder;
-import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotSampler;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotBuilder;
+import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import dev.themeinerlp.minecraftotel.paper.util.Percentiles;
