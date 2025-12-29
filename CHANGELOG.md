@@ -1,3 +1,9 @@
+## 1.1.0 (2025-12-29)
+
+* Merge branch 'main' of https://github.com/TheMeinerLP/MinecraftOTEL ([f7494ec](https://github.com/TheMeinerLP/MinecraftOTEL/commit/f7494ec))
+* feat: improve OpenTelemetry API detection and add warning for missing dependency ([ef8adb3](https://github.com/TheMeinerLP/MinecraftOTEL/commit/ef8adb3))
+* docs: add README ([9db4dca](https://github.com/TheMeinerLP/MinecraftOTEL/commit/9db4dca))
+
 ## 1.0.0 (2025-12-29)
 
 * chore: setup semantic-release with configuration and dependencies ([159051f](https://github.com/TheMeinerLP/MinecraftOTEL/commit/159051f))
