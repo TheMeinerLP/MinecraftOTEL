@@ -1,6 +1,7 @@
 package dev.themeinerlp.minecraftotel.paper.state;
 
 import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.api.TelemetryStateStore;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +11,7 @@ import org.bukkit.World;
 /**
  * Thread-safe state holder for Paper telemetry counters and snapshots.
  */
-public final class TelemetryState {
+public final class TelemetryState implements TelemetryStateStore {
     private final Map<String, Long> entitiesGaugeByWorld;
     private final Map<String, Long> chunksGaugeByWorld;
     private volatile TelemetrySnapshot snapshot;
@@ -28,6 +29,7 @@ public final class TelemetryState {
      *
      * @return current snapshot
      */
+    @Override
     public TelemetrySnapshot getSnapshot() {
         return snapshot;
     }
@@ -37,6 +39,7 @@ public final class TelemetryState {
      *
      * @param snapshot new snapshot to expose
      */
+    @Override
     public void setSnapshot(TelemetrySnapshot snapshot) {
         this.snapshot = snapshot;
     }

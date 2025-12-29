@@ -9,10 +9,12 @@ import dev.themeinerlp.minecraftotel.api.TelemetryListener;
 import dev.themeinerlp.minecraftotel.api.TelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.TelemetryService;
 import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotBuilder;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotSampler;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotStore;
+import dev.themeinerlp.minecraftotel.api.TelemetryStateStore;
 import dev.themeinerlp.minecraftotel.velocity.config.VelocityPluginConfig;
-import dev.themeinerlp.minecraftotel.velocity.sampler.VelocityProxySampler;
-import dev.themeinerlp.minecraftotel.velocity.sampler.VelocitySampler;
-import dev.themeinerlp.minecraftotel.velocity.state.VelocityTelemetryState;
+import dev.themeinerlp.minecraftotel.velocity.sampler.VelocitySnapshotSampler;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 import java.nio.file.Path;
@@ -30,11 +32,12 @@ public final class VelocityTelemetryService implements TelemetryService {
     private final Path dataDirectory;
     private final String version;
     private final TelemetryCollector collector;
+    private final List<TelemetrySnapshotSampler> snapshotSamplers;
     private final List<TelemetrySampler> samplers;
     private final List<TelemetryListener> listeners;
     private VelocityPluginConfig config;
-    private VelocityTelemetryState state;
-    private VelocitySampler sampler;
+    private final TelemetryStateStore state;
+    private VelocitySnapshotSampler snapshotSampler;
     private ScheduledTask samplingTask;
     private volatile boolean running;
 
@@ -61,10 +64,11 @@ public final class VelocityTelemetryService implements TelemetryService {
                 .setInstrumentationVersion(version)
                 .build();
         this.collector = new MeterTelemetryCollector(meter);
+        this.snapshotSamplers = new CopyOnWriteArrayList<>();
         this.samplers = new CopyOnWriteArrayList<>();
         this.samplers.add(new SnapshotTelemetrySampler());
         this.listeners = new CopyOnWriteArrayList<>();
-        this.state = new VelocityTelemetryState();
+        this.state = new TelemetrySnapshotStore();
     }
 
     /**
@@ -81,7 +85,8 @@ public final class VelocityTelemetryService implements TelemetryService {
                 logger,
                 getClass().getClassLoader()
         );
-        this.sampler = new VelocityProxySampler(proxyServer, config);
+        this.snapshotSampler = new VelocitySnapshotSampler(proxyServer, config);
+        this.snapshotSamplers.add(snapshotSampler);
 
         sampleOnce();
         startSamplingTask();
@@ -104,6 +109,19 @@ public final class VelocityTelemetryService implements TelemetryService {
     @Override
     public TelemetrySnapshot getSnapshot() {
         return state.getSnapshot();
+    }
+
+    @Override
+    public void addSnapshotSampler(TelemetrySnapshotSampler sampler) {
+        if (sampler == null) {
+            return;
+        }
+        snapshotSamplers.add(sampler);
+    }
+
+    @Override
+    public void removeSnapshotSampler(TelemetrySnapshotSampler sampler) {
+        snapshotSamplers.remove(sampler);
     }
 
     @Override
@@ -152,7 +170,11 @@ public final class VelocityTelemetryService implements TelemetryService {
     }
 
     private void sampleOnce() {
-        TelemetrySnapshot snapshot = sampler.sample();
+        TelemetrySnapshotBuilder builder = new TelemetrySnapshotBuilder();
+        for (TelemetrySnapshotSampler sampler : snapshotSamplers) {
+            sampler.sample(builder);
+        }
+        TelemetrySnapshot snapshot = builder.build();
         state.setSnapshot(snapshot);
         for (TelemetryListener listener : listeners) {
             listener.onSample(snapshot);

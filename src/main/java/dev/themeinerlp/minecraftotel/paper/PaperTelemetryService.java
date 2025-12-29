@@ -7,18 +7,17 @@ import dev.themeinerlp.minecraftotel.api.TelemetryListener;
 import dev.themeinerlp.minecraftotel.api.TelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.TelemetryService;
 import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotBuilder;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
 import dev.themeinerlp.minecraftotel.paper.listeners.ChunkCounterListener;
 import dev.themeinerlp.minecraftotel.paper.listeners.EntityCounterListener;
-import dev.themeinerlp.minecraftotel.paper.sampler.PaperSampler;
-import dev.themeinerlp.minecraftotel.paper.sampler.ServerSampler;
-import dev.themeinerlp.minecraftotel.paper.sampler.SparkSampler;
+import dev.themeinerlp.minecraftotel.paper.sampler.PaperSnapshotSampler;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import dev.themeinerlp.minecraftotel.paper.tick.TickDurationRecorder;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,11 +30,11 @@ public final class PaperTelemetryService implements TelemetryService {
     private final PluginConfig config;
     private final TelemetryState state;
     private final TelemetryCollector collector;
+    private final List<TelemetrySnapshotSampler> snapshotSamplers;
     private final List<TelemetrySampler> samplers;
     private final List<TelemetryListener> listeners;
     private TickDurationRecorder tickDurationRecorder;
-    private ServerSampler serverSampler;
-    private long lastBaselineMillis;
+    private PaperSnapshotSampler snapshotSampler;
     private volatile boolean running;
 
     /**
@@ -53,6 +52,7 @@ public final class PaperTelemetryService implements TelemetryService {
                 .setInstrumentationVersion(plugin.getDescription().getVersion())
                 .build();
         this.collector = new MeterTelemetryCollector(meter);
+        this.snapshotSamplers = new CopyOnWriteArrayList<>();
         this.samplers = new CopyOnWriteArrayList<>();
         this.samplers.add(new SnapshotTelemetrySampler());
         this.listeners = new CopyOnWriteArrayList<>();
@@ -91,20 +91,12 @@ public final class PaperTelemetryService implements TelemetryService {
             tickDurationRecorder.start();
         }
 
-        ServerSampler paperSampler = new PaperSampler();
-        ServerSampler sparkSampler = null;
-        if (config.preferSpark && isSparkInstalled()) {
-            sparkSampler = new SparkSampler(paperSampler);
-        }
-        if (sparkSampler != null && sparkSampler.isAvailable()) {
-            serverSampler = sparkSampler;
-        } else {
-            serverSampler = paperSampler;
-        }
+        snapshotSampler = new PaperSnapshotSampler(plugin.getServer(), config, state);
+        snapshotSamplers.add(snapshotSampler);
 
         startSamplingTask();
 
-        plugin.getLogger().info("Sampler: " + samplerName(paperSampler, sparkSampler));
+        plugin.getLogger().info("Sampler: " + snapshotSampler.samplerName());
         plugin.getLogger().info("Paper entity events enabled: " + config.enableEntities);
         plugin.getLogger().info("Paper tick events enabled: " + config.enableTick);
     }
@@ -122,6 +114,19 @@ public final class PaperTelemetryService implements TelemetryService {
     @Override
     public TelemetrySnapshot getSnapshot() {
         return state.getSnapshot();
+    }
+
+    @Override
+    public void addSnapshotSampler(TelemetrySnapshotSampler sampler) {
+        if (sampler == null) {
+            return;
+        }
+        snapshotSamplers.add(sampler);
+    }
+
+    @Override
+    public void removeSnapshotSampler(TelemetrySnapshotSampler sampler) {
+        snapshotSamplers.remove(sampler);
     }
 
     @Override
@@ -167,60 +172,15 @@ public final class PaperTelemetryService implements TelemetryService {
         Bukkit.getScheduler().runTaskTimer(
                 plugin,
                 () -> {
-                    long playersOnline = plugin.getServer().getOnlinePlayers().size();
-                    ServerSampler.SampleResult sampleResult = config.enableTpsMspt
-                            ? serverSampler.sample(plugin.getServer())
-                            : ServerSampler.SampleResult.empty();
-
-                    long now = System.currentTimeMillis();
-                    boolean baselineDue = lastBaselineMillis == 0L
-                            || now - lastBaselineMillis >= config.baselineScanIntervalSeconds * 1000L;
-                    if (baselineDue) {
-                        lastBaselineMillis = now;
+                    TelemetrySnapshotBuilder builder = new TelemetrySnapshotBuilder();
+                    for (TelemetrySnapshotSampler sampler : snapshotSamplers) {
+                        sampler.sample(builder);
                     }
-
-                    Map<String, Long> baselineEntities = null;
-                    if (!config.enableEntities) {
-                        baselineEntities = Map.of();
-                    } else if (baselineDue && !state.isEntityEventsAvailable()) {
-                        baselineEntities = state.scanEntities(plugin.getServer());
-                    }
-
-                    Map<String, Long> baselineChunks = null;
-                    if (!config.enableChunks) {
-                        baselineChunks = Map.of();
-                    } else if (baselineDue) {
-                        baselineChunks = state.scanChunks(plugin.getServer());
-                    }
-
-                    TelemetrySnapshot snapshot = state.rebuildSnapshot(
-                            playersOnline,
-                            sampleResult.tpsNullable(),
-                            sampleResult.msptAvgNullable(),
-                            sampleResult.msptP95Nullable(),
-                            baselineEntities,
-                            baselineChunks
-                    );
-                    updateSnapshot(snapshot);
+                    updateSnapshot(builder.build());
                 },
                 0L,
                 intervalTicks
         );
-    }
-
-    private String samplerName(ServerSampler paperSampler, ServerSampler sparkSampler) {
-        if (sparkSampler != null && serverSampler == sparkSampler) {
-            return "spark";
-        }
-        if (paperSampler.isAvailable()) {
-            return "paper";
-        }
-        return "none";
-    }
-
-    private boolean isSparkInstalled() {
-        var plugin = this.plugin.getServer().getPluginManager().getPlugin("spark");
-        return plugin != null && plugin.isEnabled();
     }
 
     private void updateSnapshot(TelemetrySnapshot snapshot) {
