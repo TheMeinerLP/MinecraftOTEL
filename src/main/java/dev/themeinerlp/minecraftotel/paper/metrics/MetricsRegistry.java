@@ -13,8 +13,13 @@ import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import java.util.Map;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * Registers OpenTelemetry meters and exposes counters for Paper events.
+ */
 public final class MetricsRegistry {
+    /** Attribute key for world names. */
     public static final AttributeKey<String> WORLD_KEY = AttributeKey.stringKey("world");
+    /** Attribute key for TPS windows. */
     public static final AttributeKey<String> WINDOW_KEY = AttributeKey.stringKey("window");
     private static final String[] TPS_WINDOWS = {"1m", "5m", "15m"};
 
@@ -24,6 +29,12 @@ public final class MetricsRegistry {
     private final LongCounter chunksUnloadCounter;
     private final DoubleHistogram tickDurationHistogram;
 
+    /**
+     * Creates and registers metric instruments for Paper telemetry.
+     *
+     * @param plugin plugin instance for version metadata
+     * @param state telemetry state feeding gauge callbacks
+     */
     public MetricsRegistry(JavaPlugin plugin, TelemetryState state) {
         String version = plugin.getDescription().getVersion();
         Meter meter = GlobalOpenTelemetry.get().meterBuilder("minecraft-otel-bukkit")
@@ -78,26 +89,57 @@ public final class MetricsRegistry {
                 .buildWithCallback(measurement -> recordMsptP95(measurement, state));
     }
 
+    /**
+     * Counter for entity additions.
+     *
+     * @return entity add counter
+     */
     public LongCounter getEntitiesAddedCounter() {
         return entitiesAddedCounter;
     }
 
+    /**
+     * Counter for entity removals.
+     *
+     * @return entity remove counter
+     */
     public LongCounter getEntitiesRemovedCounter() {
         return entitiesRemovedCounter;
     }
 
+    /**
+     * Counter for chunk loads.
+     *
+     * @return chunk load counter
+     */
     public LongCounter getChunksLoadCounter() {
         return chunksLoadCounter;
     }
 
+    /**
+     * Counter for chunk unloads.
+     *
+     * @return chunk unload counter
+     */
     public LongCounter getChunksUnloadCounter() {
         return chunksUnloadCounter;
     }
 
+    /**
+     * Histogram for tick durations in milliseconds.
+     *
+     * @return tick duration histogram
+     */
     public DoubleHistogram getTickDurationHistogram() {
         return tickDurationHistogram;
     }
 
+    /**
+     * Builds world attributes for metric labels.
+     *
+     * @param worldName world name
+     * @return attributes with world label
+     */
     public static Attributes worldAttributes(String worldName) {
         return Attributes.of(WORLD_KEY, worldName);
     }

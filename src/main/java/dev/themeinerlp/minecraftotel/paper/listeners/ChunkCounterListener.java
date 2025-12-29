@@ -8,15 +8,29 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 
+/**
+ * Records chunk load/unload events to update gauges and counters.
+ */
 public final class ChunkCounterListener implements Listener {
     private final TelemetryState state;
     private final MetricsRegistry metrics;
 
+    /**
+     * Creates a chunk counter listener.
+     *
+     * @param state telemetry state
+     * @param metrics metrics registry
+     */
     public ChunkCounterListener(TelemetryState state, MetricsRegistry metrics) {
         this.state = state;
         this.metrics = metrics;
     }
 
+    /**
+     * Handles chunk load events.
+     *
+     * @param event chunk load event
+     */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onChunkLoad(ChunkLoadEvent event) {
         String worldName = event.getWorld().getName();
@@ -24,6 +38,11 @@ public final class ChunkCounterListener implements Listener {
         metrics.getChunksLoadCounter().add(1L, MetricsRegistry.worldAttributes(worldName));
     }
 
+    /**
+     * Handles chunk unload events.
+     *
+     * @param event chunk unload event
+     */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onChunkUnload(ChunkUnloadEvent event) {
         String worldName = event.getWorld().getName();
