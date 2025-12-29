@@ -1,15 +1,15 @@
 package dev.themeinerlp.minecraftotel.api.snapshot;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Immutable snapshot of the latest telemetry values.
  *
- * @param <TPlatform> platform-specific payload type
  * @since 1.1.0
  * @version 1.1.0
  */
-public abstract class TelemetrySnapshot<TPlatform> {
+public abstract class TelemetrySnapshot {
     private final long playersOnline;
     private final Map<String, Long> entitiesLoadedByWorld;
     private final Map<String, Long> chunksLoadedByWorld;
@@ -18,7 +18,7 @@ public abstract class TelemetrySnapshot<TPlatform> {
     private final Double msptP95Nullable;
     private final Map<String, Long> playersByServer;
     private final long registeredServers;
-    private final TPlatform platformData;
+    private final Object platformData;
 
     protected TelemetrySnapshot(
             long playersOnline,
@@ -29,10 +29,10 @@ public abstract class TelemetrySnapshot<TPlatform> {
             Double msptP95Nullable,
             Map<String, Long> playersByServer,
             long registeredServers,
-            TPlatform platformData
+            Object platformData
     ) {
         this.playersOnline = playersOnline;
-        this.entitiesLoadedByWorld = entitiesLoadedByWorld == null ? Map.of() : entitiesLoadedByWorld;
+        this.entitiesLoadedByWorld = entitiesLoadedByWorld;
         this.chunksLoadedByWorld = chunksLoadedByWorld == null ? Map.of() : chunksLoadedByWorld;
         this.tpsNullable = tpsNullable;
         this.msptAvgNullable = msptAvgNullable;
@@ -47,8 +47,8 @@ public abstract class TelemetrySnapshot<TPlatform> {
      *
      * @return empty snapshot
      */
-    public static TelemetrySnapshot<Void> empty() {
-        return of(0L, Map.of(), Map.of(), null, null, null, Map.of(), 0L, null);
+    public static TelemetrySnapshot empty() {
+        return of(0L, null, Map.of(), null, null, null, Map.of(), 0L, null);
     }
 
     /**
@@ -63,10 +63,9 @@ public abstract class TelemetrySnapshot<TPlatform> {
      * @param playersByServer players online per backend server (Velocity only)
      * @param registeredServers number of registered backend servers (Velocity only)
      * @param platformData platform-specific payload or null
-     * @param <TPlatform> platform payload type
      * @return immutable snapshot
      */
-    public static <TPlatform> TelemetrySnapshot<TPlatform> of(
+    public static TelemetrySnapshot of(
             long playersOnline,
             Map<String, Long> entitiesLoadedByWorld,
             Map<String, Long> chunksLoadedByWorld,
@@ -75,9 +74,9 @@ public abstract class TelemetrySnapshot<TPlatform> {
             Double msptP95Nullable,
             Map<String, Long> playersByServer,
             long registeredServers,
-            TPlatform platformData
+            Object platformData
     ) {
-        return new DefaultTelemetrySnapshot<>(
+        return new DefaultTelemetrySnapshot(
                 playersOnline,
                 entitiesLoadedByWorld,
                 chunksLoadedByWorld,
@@ -100,12 +99,12 @@ public abstract class TelemetrySnapshot<TPlatform> {
     }
 
     /**
-     * Returns entities loaded per world.
+     * Returns entities loaded per world when available.
      *
      * @return entities per world
      */
-    public Map<String, Long> entitiesLoadedByWorld() {
-        return entitiesLoadedByWorld;
+    public Optional<Map<String, Long>> entitiesLoadedByWorld() {
+        return Optional.ofNullable(entitiesLoadedByWorld);
     }
 
     /**
@@ -167,11 +166,11 @@ public abstract class TelemetrySnapshot<TPlatform> {
      *
      * @return platform data or null
      */
-    public TPlatform platformData() {
+    public Object platformData() {
         return platformData;
     }
 
-    private static final class DefaultTelemetrySnapshot<TPlatform> extends TelemetrySnapshot<TPlatform> {
+    private static final class DefaultTelemetrySnapshot extends TelemetrySnapshot {
         private DefaultTelemetrySnapshot(
                 long playersOnline,
                 Map<String, Long> entitiesLoadedByWorld,
@@ -181,7 +180,7 @@ public abstract class TelemetrySnapshot<TPlatform> {
                 Double msptP95Nullable,
                 Map<String, Long> playersByServer,
                 long registeredServers,
-                TPlatform platformData
+                Object platformData
         ) {
             super(
                     playersOnline,

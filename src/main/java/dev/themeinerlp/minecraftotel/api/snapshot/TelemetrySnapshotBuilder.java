@@ -75,10 +75,10 @@ public final class TelemetrySnapshotBuilder {
      *
      * @return telemetry snapshot
      */
-    public TelemetrySnapshot<Object> build() {
+    public TelemetrySnapshot build() {
         return TelemetrySnapshot.of(
                 playersOnline == null ? 0L : playersOnline,
-                entitiesLoadedByWorld == null ? Map.of() : entitiesLoadedByWorld,
+                entitiesLoadedByWorld,
                 chunksLoadedByWorld == null ? Map.of() : chunksLoadedByWorld,
                 tps,
                 msptAvg,

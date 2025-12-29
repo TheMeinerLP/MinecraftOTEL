@@ -17,5 +17,5 @@ public interface TelemetrySampler {
      * @param snapshot latest telemetry snapshot
      * @param collector telemetry collector
      */
-    void sample(TelemetrySnapshot<?> snapshot, TelemetryCollector collector);
+    void sample(TelemetrySnapshot snapshot, TelemetryCollector collector);
 }

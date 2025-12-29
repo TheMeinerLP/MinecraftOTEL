@@ -63,9 +63,9 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
                 baselineChunks
         );
 
+        builder.setPlayersOnline(snapshot.playersOnline());
+        snapshot.entitiesLoadedByWorld().ifPresent(builder::setEntitiesLoadedByWorld);
         builder
-                .setPlayersOnline(snapshot.playersOnline())
-                .setEntitiesLoadedByWorld(snapshot.entitiesLoadedByWorld())
                 .setChunksLoadedByWorld(snapshot.chunksLoadedByWorld())
                 .setTps(snapshot.tpsNullable())
                 .setMsptAvg(snapshot.msptAvgNullable())

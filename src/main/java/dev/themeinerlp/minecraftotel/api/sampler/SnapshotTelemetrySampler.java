@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public final class SnapshotTelemetrySampler implements TelemetrySampler {
     @Override
-    public void sample(TelemetrySnapshot<?> snapshot, TelemetryCollector collector) {
+    public void sample(TelemetrySnapshot snapshot, TelemetryCollector collector) {
         if (snapshot == null || collector == null) {
             return;
         }
@@ -26,14 +26,16 @@ public final class SnapshotTelemetrySampler implements TelemetrySampler {
                 Attributes.empty()
         );
 
-        for (Map.Entry<String, Long> entry : snapshot.entitiesLoadedByWorld().entrySet()) {
-            collector.recordLongGauge(
-                    StandardMetrics.ENTITIES_LOADED,
-                    entry.getValue(),
-                    StandardMetrics.UNIT_COUNT,
-                    Attributes.of(StandardMetrics.WORLD_KEY, entry.getKey())
-            );
-        }
+        snapshot.entitiesLoadedByWorld().ifPresent(entitiesByWorld -> {
+            for (Map.Entry<String, Long> entry : entitiesByWorld.entrySet()) {
+                collector.recordLongGauge(
+                        StandardMetrics.ENTITIES_LOADED,
+                        entry.getValue(),
+                        StandardMetrics.UNIT_COUNT,
+                        Attributes.of(StandardMetrics.WORLD_KEY, entry.getKey())
+                );
+            }
+        });
 
         for (Map.Entry<String, Long> entry : snapshot.chunksLoadedByWorld().entrySet()) {
             collector.recordLongGauge(

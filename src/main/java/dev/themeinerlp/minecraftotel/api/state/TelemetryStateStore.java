@@ -14,12 +14,12 @@ public interface TelemetryStateStore {
      *
      * @return snapshot
      */
-    TelemetrySnapshot<?> getSnapshot();
+    TelemetrySnapshot getSnapshot();
 
     /**
      * Updates the current snapshot.
      *
      * @param snapshot new snapshot
      */
-    void setSnapshot(TelemetrySnapshot<?> snapshot);
+    void setSnapshot(TelemetrySnapshot snapshot);
 }

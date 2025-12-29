@@ -112,7 +112,7 @@ public final class PaperTelemetryService implements TelemetryService {
     }
 
     @Override
-    public TelemetrySnapshot<?> getSnapshot() {
+    public TelemetrySnapshot getSnapshot() {
         return state.getSnapshot();
     }
 
@@ -183,7 +183,7 @@ public final class PaperTelemetryService implements TelemetryService {
         );
     }
 
-    private void updateSnapshot(TelemetrySnapshot<?> snapshot) {
+    private void updateSnapshot(TelemetrySnapshot snapshot) {
         state.setSnapshot(snapshot);
         for (TelemetryListener listener : listeners) {
             listener.onSample(snapshot);
@@ -191,7 +191,7 @@ public final class PaperTelemetryService implements TelemetryService {
         runSamplers(snapshot);
     }
 
-    private void runSamplers(TelemetrySnapshot<?> snapshot) {
+    private void runSamplers(TelemetrySnapshot snapshot) {
         for (TelemetrySampler sampler : samplers) {
             sampler.sample(snapshot, collector);
         }
