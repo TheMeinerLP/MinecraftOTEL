@@ -40,7 +40,7 @@ version = "1.0.0"
 
 dependencies {
     compileOnly(libs.paper)
-    compileOnly(libs.opentelemetry.api)
+    implementation(libs.opentelemetry.api)
     compileOnly(libs.spark.api)
 }
 
@@ -78,6 +78,12 @@ paper {
     apiVersion = "1.19"
     authors = listOf("TheMeinerLP")
     foliaSupported = true
+    hasOpenClassloader = true
+    serverDependencies {
+        register("spark") {
+            this.required = false
+        }
+    }
 }
 val baseVersion = version as String
 val baseChannel = with(baseVersion) {
