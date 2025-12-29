@@ -1,13 +1,12 @@
 package dev.themeinerlp.minecraftotel.api;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Static access point for the MinecraftOTEL API.
  */
 public final class MinecraftOtelApiProvider {
-    private static final AtomicReference<MinecraftOtelApi> API = new AtomicReference<>();
+    private static volatile MinecraftOtelApi api;
 
     private MinecraftOtelApiProvider() {
     }
@@ -18,7 +17,9 @@ public final class MinecraftOtelApiProvider {
      * @param api api implementation
      */
     public static void register(MinecraftOtelApi api) {
-        API.set(api);
+        synchronized (MinecraftOtelApiProvider.class) {
+            MinecraftOtelApiProvider.api = api;
+        }
     }
 
     /**
@@ -27,7 +28,11 @@ public final class MinecraftOtelApiProvider {
      * @param api api implementation
      */
     public static void unregister(MinecraftOtelApi api) {
-        API.compareAndSet(api, null);
+        synchronized (MinecraftOtelApiProvider.class) {
+            if (MinecraftOtelApiProvider.api == api) {
+                MinecraftOtelApiProvider.api = null;
+            }
+        }
     }
 
     /**
@@ -36,6 +41,6 @@ public final class MinecraftOtelApiProvider {
      * @return optional api instance
      */
     public static Optional<MinecraftOtelApi> get() {
-        return Optional.ofNullable(API.get());
+        return Optional.ofNullable(api);
     }
 }

@@ -4,10 +4,6 @@ import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.LongAdder;
 import org.bukkit.Server;
 import org.bukkit.World;
 
@@ -15,16 +11,16 @@ import org.bukkit.World;
  * Thread-safe state holder for Paper telemetry counters and snapshots.
  */
 public final class TelemetryState {
-    private final AtomicReference<TelemetrySnapshot> snapshotRef;
-    private final ConcurrentHashMap<String, LongAdder> entitiesGaugeByWorld;
-    private final ConcurrentHashMap<String, LongAdder> chunksGaugeByWorld;
-    private final AtomicBoolean entityEventsAvailable;
+    private final Map<String, Long> entitiesGaugeByWorld;
+    private final Map<String, Long> chunksGaugeByWorld;
+    private volatile TelemetrySnapshot snapshot;
+    private volatile boolean entityEventsAvailable;
 
     public TelemetryState() {
-        this.snapshotRef = new AtomicReference<>(TelemetrySnapshot.empty());
-        this.entitiesGaugeByWorld = new ConcurrentHashMap<>();
-        this.chunksGaugeByWorld = new ConcurrentHashMap<>();
-        this.entityEventsAvailable = new AtomicBoolean(false);
+        this.snapshot = TelemetrySnapshot.empty();
+        this.entitiesGaugeByWorld = new HashMap<>();
+        this.chunksGaugeByWorld = new HashMap<>();
+        this.entityEventsAvailable = false;
     }
 
     /**
@@ -33,7 +29,7 @@ public final class TelemetryState {
      * @return current snapshot
      */
     public TelemetrySnapshot getSnapshot() {
-        return snapshotRef.get();
+        return snapshot;
     }
 
     /**
@@ -42,7 +38,7 @@ public final class TelemetryState {
      * @param snapshot new snapshot to expose
      */
     public void setSnapshot(TelemetrySnapshot snapshot) {
-        snapshotRef.set(snapshot);
+        this.snapshot = snapshot;
     }
 
     /**
@@ -51,7 +47,7 @@ public final class TelemetryState {
      * @return true when entity events are enabled
      */
     public boolean isEntityEventsAvailable() {
-        return entityEventsAvailable.get();
+        return entityEventsAvailable;
     }
 
     /**
@@ -60,7 +56,7 @@ public final class TelemetryState {
      * @param available true when entity events are enabled
      */
     public void setEntityEventsAvailable(boolean available) {
-        entityEventsAvailable.set(available);
+        entityEventsAvailable = available;
     }
 
     /**
@@ -69,7 +65,7 @@ public final class TelemetryState {
      * @param worldName world name
      */
     public void incrementEntity(String worldName) {
-        addGauge(entitiesGaugeByWorld, worldName, 1L);
+        updateGauge(entitiesGaugeByWorld, worldName, 1L);
     }
 
     /**
@@ -78,7 +74,7 @@ public final class TelemetryState {
      * @param worldName world name
      */
     public void decrementEntity(String worldName) {
-        addGauge(entitiesGaugeByWorld, worldName, -1L);
+        updateGauge(entitiesGaugeByWorld, worldName, -1L);
     }
 
     /**
@@ -87,7 +83,7 @@ public final class TelemetryState {
      * @param worldName world name
      */
     public void incrementChunk(String worldName) {
-        addGauge(chunksGaugeByWorld, worldName, 1L);
+        updateGauge(chunksGaugeByWorld, worldName, 1L);
     }
 
     /**
@@ -96,7 +92,7 @@ public final class TelemetryState {
      * @param worldName world name
      */
     public void decrementChunk(String worldName) {
-        addGauge(chunksGaugeByWorld, worldName, -1L);
+        updateGauge(chunksGaugeByWorld, worldName, -1L);
     }
 
     /**
@@ -175,28 +171,28 @@ public final class TelemetryState {
         return baseline;
     }
 
-    private static void addGauge(
-            ConcurrentHashMap<String, LongAdder> gauge,
-            String worldName,
-            long delta
-    ) {
+    private static void updateGauge(Map<String, Long> gauge, String worldName, long delta) {
         if (worldName == null || worldName.isBlank()) {
             return;
         }
-        gauge.computeIfAbsent(worldName, ignored -> new LongAdder()).add(delta);
+        synchronized (gauge) {
+            gauge.merge(worldName, delta, Long::sum);
+        }
     }
 
-    private static Map<String, Long> snapshotFromGauge(ConcurrentHashMap<String, LongAdder> gauge) {
+    private static Map<String, Long> snapshotFromGauge(Map<String, Long> gauge) {
         Map<String, Long> snapshot = new HashMap<>();
-        for (Map.Entry<String, LongAdder> entry : gauge.entrySet()) {
-            long value = entry.getValue().sum();
-            snapshot.put(entry.getKey(), Math.max(0L, value));
+        synchronized (gauge) {
+            for (Map.Entry<String, Long> entry : gauge.entrySet()) {
+                long value = entry.getValue();
+                snapshot.put(entry.getKey(), Math.max(0L, value));
+            }
         }
         return Map.copyOf(snapshot);
     }
 
     private static Map<String, Long> applyBaseline(
-            ConcurrentHashMap<String, LongAdder> gauge,
+            Map<String, Long> gauge,
             Map<String, Long> baseline
     ) {
         Map<String, Long> normalized = new HashMap<>();
@@ -209,14 +205,14 @@ public final class TelemetryState {
     }
 
     private static void replaceGauge(
-            ConcurrentHashMap<String, LongAdder> gauge,
+            Map<String, Long> gauge,
             Map<String, Long> baseline
     ) {
-        gauge.clear();
-        for (Map.Entry<String, Long> entry : baseline.entrySet()) {
-            LongAdder adder = new LongAdder();
-            adder.add(Math.max(0L, entry.getValue()));
-            gauge.put(entry.getKey(), adder);
+        synchronized (gauge) {
+            gauge.clear();
+            for (Map.Entry<String, Long> entry : baseline.entrySet()) {
+                gauge.put(entry.getKey(), Math.max(0L, entry.getValue()));
+            }
         }
     }
 }
