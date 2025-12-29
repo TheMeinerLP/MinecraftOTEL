@@ -6,7 +6,10 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import dev.themeinerlp.minecraftotel.api.MinecraftOtelApi;
+import dev.themeinerlp.minecraftotel.api.MinecraftOtelApiProvider;
 import dev.themeinerlp.minecraftotel.velocity.service.VelocityTelemetryService;
+import dev.themeinerlp.minecraftotel.velocity.api.VelocityMinecraftOtelApi;
 import java.nio.file.Path;
 import org.slf4j.Logger;
 
@@ -17,6 +20,7 @@ public final class MinecraftOTELVelocityPlugin {
     private final ProxyServer proxyServer;
     private final Logger logger;
     private final Path dataDirectory;
+    private MinecraftOtelApi api;
     private VelocityTelemetryService telemetryService;
 
     @Inject
@@ -32,11 +36,13 @@ public final class MinecraftOTELVelocityPlugin {
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
+        api = new VelocityMinecraftOtelApi(resolveVersion());
+        MinecraftOtelApiProvider.register(api);
         telemetryService = new VelocityTelemetryService(
                 proxyServer,
                 logger,
                 dataDirectory,
-                resolveVersion()
+                api.getVersion()
         );
         telemetryService.start();
     }
@@ -46,6 +52,10 @@ public final class MinecraftOTELVelocityPlugin {
         if (telemetryService != null) {
             telemetryService.stop();
             telemetryService = null;
+        }
+        if (api != null) {
+            MinecraftOtelApiProvider.unregister(api);
+            api = null;
         }
     }
 
