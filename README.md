@@ -98,11 +98,13 @@ telemetry snapshots. The API is identical on Paper and Velocity.
 Notes:
 - Paper-only fields: `entitiesLoadedByWorld`, `chunksLoadedByWorld`, `tpsNullable`, `msptAvgNullable`, `msptP95Nullable`.
 - Velocity-only fields: `playersByServer`, `registeredServers`.
+- Custom sampling: register a sampler to emit gauges/counters/histograms via the shared collector.
 
 ### Paper example
 ```java
 import dev.themeinerlp.minecraftotel.api.MinecraftOtelApi;
 import dev.themeinerlp.minecraftotel.api.MinecraftOtelApiProvider;
+import dev.themeinerlp.minecraftotel.api.StandardMetrics;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.LongCounter;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -127,6 +129,15 @@ public final class MyPlugin extends JavaPlugin {
             long players = snapshot.playersOnline();
             // Use snapshot fields to enrich your own metrics or logs.
         });
+
+        api.getTelemetryService().addSampler((snapshot, collector) -> {
+            collector.recordLongGauge(
+                "myplugin.players.last",
+                snapshot.playersOnline(),
+                StandardMetrics.UNIT_COUNT,
+                io.opentelemetry.api.common.Attributes.empty()
+            );
+        });
     }
 }
 ```
@@ -143,6 +154,9 @@ public final class MyPlugin {
             api.getTelemetryService().addListener(snapshot -> {
                 long players = snapshot.playersOnline();
                 long backends = snapshot.registeredServers();
+            });
+            api.getTelemetryService().addSampler((snapshot, collector) -> {
+                collector.recordLongGauge("myproxy.players", snapshot.playersOnline());
             });
         });
     }
