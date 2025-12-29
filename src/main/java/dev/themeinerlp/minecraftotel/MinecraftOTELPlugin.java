@@ -27,11 +27,6 @@ public final class MinecraftOTELPlugin extends JavaPlugin implements ThreadHelpe
 
     @Override
     public void onEnable() {
-        boolean openTelemetryAvailable = syncThreadForServiceLoader(this::isOpenTelemetryAvailable);
-        if (!openTelemetryAvailable) {
-            getLogger().severe("OpenTelemetry API not found on the classpath. Plugin will be disabled.");
-            return;
-        }
         reloadConfig();
         saveDefaultConfig();
         this.config = PluginConfig.load(this);
@@ -150,18 +145,5 @@ public final class MinecraftOTELPlugin extends JavaPlugin implements ThreadHelpe
     private boolean isSparkInstalled() {
         var plugin = getServer().getPluginManager().getPlugin("spark");
         return plugin != null && plugin.isEnabled();
-    }
-
-    private boolean isOpenTelemetryAvailable() {
-        try {
-            OpenTelemetry otel = GlobalOpenTelemetry.get();
-            System.out.println("OpenTelemetry implementation: " + otel.getClass().getName());
-            System.out.println("OpenTelemetry implementation: " + otel != null);
-            String cn = otel.getClass().getName();
-            return cn.startsWith("io.opentelemetry.sdk.")
-                    || cn.contains("OpenTelemetrySdk");
-        } catch (Throwable t) {
-            return false;
-        }
     }
 }
