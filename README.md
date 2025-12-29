@@ -120,7 +120,7 @@ Open Grafana at http://localhost:3000 (anonymous access is enabled).
 
 Notes:
 - Alloy listens on `4317/4318` for OTLP and forwards traces to Tempo.
-- Prometheus scrapes Alloy at `alloy:12345` (exposed as `localhost:12345`).
+- Metrics are written to Prometheus via remote-write (`/api/v1/write`).
 - Loki is included for log testing. If you export logs via OTLP, add a logs
   pipeline in `docker/alloy.alloy`.
 

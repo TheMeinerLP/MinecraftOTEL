@@ -12,13 +12,13 @@ otelcol.receiver.otlp "default" {
   }
 
   output {
-    metrics = [otelcol.exporter.prometheus.default.input]
+    metrics = [otelcol.exporter.prometheusremotewrite.default.input]
     traces = [otelcol.exporter.otlp.tempo.input]
   }
 }
 
-otelcol.exporter.prometheus "default" {
-  endpoint = "0.0.0.0:12345"
+otelcol.exporter.prometheusremotewrite "default" {
+  endpoint = "http://prometheus:9090/api/v1/write"
 }
 
 otelcol.exporter.otlp "tempo" {

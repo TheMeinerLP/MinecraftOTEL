@@ -2,8 +2,7 @@ global:
   scrape_interval: 5s
 
 scrape_configs:
-  - job_name: minecraftotel
-    metrics_path: /metrics
+  - job_name: prometheus
     static_configs:
       - targets:
-          - alloy:12345
+          - prometheus:9090

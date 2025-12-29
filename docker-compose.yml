@@ -18,7 +18,6 @@ services:
     ports:
       - "4317:4317"
       - "4318:4318"
-      - "12345:12345"
       - "12346:12346"
     depends_on:
       - tempo
@@ -34,7 +33,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.49.1
-    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--web.enable-remote-write-receiver"]
     volumes:
       - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
