@@ -10,15 +10,15 @@ services:
     ports:
       - "3200:3200"
 
-  alloy:
-    image: grafana/alloy:latest
-    command: ["run", "--server.http.listen-addr=0.0.0.0:12346", "/etc/alloy/config.alloy"]
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.103.0
+    command: ["--config=/etc/otel-collector.yaml"]
     volumes:
-      - ./docker/alloy.alloy:/etc/alloy/config.alloy:ro
+      - ./docker/otel-collector.yaml:/etc/otel-collector.yaml:ro
     ports:
       - "4317:4317"
       - "4318:4318"
-      - "12346:12346"
+      - "8889:8889"
     depends_on:
       - tempo
 
@@ -39,7 +39,7 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - alloy
+      - otel-collector
 
   grafana:
     image: grafana/grafana:latest
@@ -52,7 +52,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - alloy
+      - otel-collector
       - prometheus
       - tempo
       - loki

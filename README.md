@@ -92,7 +92,7 @@ Example (adjust exporter settings):
 ```
 
 ## Local Observability Stack (Docker Compose)
-This repository ships a local stack with Alloy, Tempo, Loki, Grafana, and
+This repository ships a local stack with OpenTelemetry Collector, Tempo, Loki, Grafana, and
 Prometheus so you can validate OpenTelemetry output quickly.
 
 Start the stack:
@@ -107,7 +107,7 @@ Download or update the Java Agent:
 ./scripts/update-java-agent.sh v2.12.0
 ```
 
-Example JVM flags (metrics + traces via OTLP to Alloy):
+Example JVM flags (metrics + traces via OTLP to the collector):
 ```
 -javaagent:./opentelemetry-javaagent.jar \
 -Dotel.metrics.exporter=otlp \
@@ -119,9 +119,9 @@ Example JVM flags (metrics + traces via OTLP to Alloy):
 Open Grafana at http://localhost:3000 (anonymous access is enabled).
 
 Notes:
-- Alloy listens on `4317/4318` for OTLP and forwards traces to Tempo.
-- Metrics are written to Prometheus via remote-write (`/api/v1/write`).
-- Logs are forwarded to Loki via Alloy (`/loki/api/v1/push`).
+- The OpenTelemetry Collector listens on `4317/4318` for OTLP and forwards traces to Tempo.
+- Prometheus scrapes metrics from the collector on `:8889`.
+- Logs are forwarded to Loki via the collector (`/loki/api/v1/push`).
 
 ## API Usage (Paper + Velocity)
 MinecraftOTEL exposes a small API so other plugins can create meters or react to
