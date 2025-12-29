@@ -38,7 +38,6 @@ public final class VelocityTelemetryService implements TelemetryService {
     private final List<TelemetryListener> listeners;
     private VelocityPluginConfig config;
     private final TelemetryStateStore state;
-    private VelocitySnapshotSampler snapshotSampler;
     private ScheduledTask samplingTask;
     private volatile boolean running;
 
@@ -86,7 +85,7 @@ public final class VelocityTelemetryService implements TelemetryService {
                 logger,
                 getClass().getClassLoader()
         );
-        this.snapshotSampler = new VelocitySnapshotSampler(proxyServer, config);
+        VelocitySnapshotSampler snapshotSampler = new VelocitySnapshotSampler(proxyServer, config);
         this.snapshotSamplers.add(snapshotSampler);
 
         sampleOnce();
