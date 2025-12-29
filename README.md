@@ -91,6 +91,41 @@ Example (adjust exporter settings):
 -javaagent:/path/to/opentelemetry-javaagent.jar
 ```
 
+## Local Observability Stack (Docker Compose)
+This repository ships a local stack with Tempo, Loki, Grafana, and Prometheus
+so you can validate OpenTelemetry output quickly.
+
+Start the stack:
+```
+docker compose up -d
+```
+
+Download or update the Java Agent:
+```
+./scripts/update-java-agent.sh
+# or pin a version:
+./scripts/update-java-agent.sh v2.12.0
+```
+
+Example JVM flags (metrics via Prometheus pull, traces via OTLP to Tempo):
+```
+-javaagent:./opentelemetry-javaagent.jar \
+-Dotel.metrics.exporter=prometheus \
+-Dotel.exporter.prometheus.host=0.0.0.0 \
+-Dotel.exporter.prometheus.port=9464 \
+-Dotel.traces.exporter=otlp \
+-Dotel.exporter.otlp.endpoint=http://localhost:4317 \
+-Dotel.exporter.otlp.protocol=grpc
+```
+
+Open Grafana at http://localhost:3000 (anonymous access is enabled).
+
+Notes:
+- Prometheus scrapes `host.docker.internal:9464` by default. On Linux you may
+  need to add a host mapping or update `docker/prometheus.yml`.
+- Loki is included for log testing. If you export logs via OTLP, route them
+  through a collector or log shipper that writes to Loki.
+
 ## API Usage (Paper + Velocity)
 MinecraftOTEL exposes a small API so other plugins can create meters or react to
 telemetry snapshots. The API is identical on Paper and Velocity.
