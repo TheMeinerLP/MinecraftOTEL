@@ -43,3 +43,5 @@ bin/
 .DS_Store
 
 \.IDEA/
+/run-*/
+/opentelemetry-javaagent.jar

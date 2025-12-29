@@ -1,0 +1,8 @@
+{
+  "id": "minecraftotel",
+  "name": "MinecraftOTEL",
+  "version": "${version}",
+  "main": "dev.themeinerlp.minecraftotel.velocity.MinecraftOTELVelocityPlugin",
+  "authors": ["TheMeinerLP"],
+  "description": "OpenTelemetry metrics for Velocity proxies."
+}
