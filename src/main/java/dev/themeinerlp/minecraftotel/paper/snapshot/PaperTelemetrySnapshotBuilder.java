@@ -9,7 +9,9 @@ import java.util.Map;
 public final class PaperTelemetrySnapshotBuilder implements TelemetrySnapshotBuilder {
     private Long playersOnline;
     private Map<String, Long> entitiesLoadedByWorld;
+    private Map<String, Long> entitiesLoadedByType;
     private Map<String, Long> chunksLoadedByWorld;
+    private Long exclusiveChunksLoaded;
     private double[] tpsNullable;
     private Double msptAvgNullable;
     private Double msptP95Nullable;
@@ -37,6 +39,17 @@ public final class PaperTelemetrySnapshotBuilder implements TelemetrySnapshotBui
     }
 
     /**
+     * Sets entities loaded per type.
+     *
+     * @param entitiesLoadedByType entities per type
+     * @return builder
+     */
+    public PaperTelemetrySnapshotBuilder setEntitiesLoadedByType(Map<String, Long> entitiesLoadedByType) {
+        this.entitiesLoadedByType = entitiesLoadedByType;
+        return this;
+    }
+
+    /**
      * Sets chunks loaded per world.
      *
      * @param chunksLoadedByWorld chunks per world
@@ -44,6 +57,17 @@ public final class PaperTelemetrySnapshotBuilder implements TelemetrySnapshotBui
      */
     public PaperTelemetrySnapshotBuilder setChunksLoadedByWorld(Map<String, Long> chunksLoadedByWorld) {
         this.chunksLoadedByWorld = chunksLoadedByWorld;
+        return this;
+    }
+
+    /**
+     * Sets the number of chunks visible to exactly one player.
+     *
+     * @param exclusiveChunksLoaded exclusive chunk count
+     * @return builder
+     */
+    public PaperTelemetrySnapshotBuilder setExclusiveChunksLoaded(long exclusiveChunksLoaded) {
+        this.exclusiveChunksLoaded = exclusiveChunksLoaded;
         return this;
     }
 
@@ -89,7 +113,9 @@ public final class PaperTelemetrySnapshotBuilder implements TelemetrySnapshotBui
         return new PaperTelemetrySnapshot(
                 playersOnline == null ? 0L : playersOnline,
                 entitiesLoadedByWorld,
+                entitiesLoadedByType,
                 chunksLoadedByWorld == null ? Map.of() : chunksLoadedByWorld,
+                exclusiveChunksLoaded == null ? 0L : exclusiveChunksLoaded,
                 tpsNullable,
                 msptAvgNullable,
                 msptP95Nullable

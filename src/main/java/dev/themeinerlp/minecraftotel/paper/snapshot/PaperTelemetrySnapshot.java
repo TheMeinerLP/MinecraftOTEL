@@ -11,10 +11,32 @@ import java.util.Optional;
 public final class PaperTelemetrySnapshot implements TelemetrySnapshot {
     private final long playersOnline;
     private final Map<String, Long> entitiesLoadedByWorld;
+    private final Map<String, Long> entitiesLoadedByType;
     private final Map<String, Long> chunksLoadedByWorld;
+    private final long exclusiveChunksLoaded;
     private final double[] tpsNullable;
     private final Double msptAvgNullable;
     private final Double msptP95Nullable;
+
+    public PaperTelemetrySnapshot(
+            long playersOnline,
+            Map<String, Long> entitiesLoadedByWorld,
+            Map<String, Long> entitiesLoadedByType,
+            Map<String, Long> chunksLoadedByWorld,
+            long exclusiveChunksLoaded,
+            double[] tpsNullable,
+            Double msptAvgNullable,
+            Double msptP95Nullable
+    ) {
+        this.playersOnline = playersOnline;
+        this.entitiesLoadedByWorld = entitiesLoadedByWorld == null ? null : Map.copyOf(entitiesLoadedByWorld);
+        this.entitiesLoadedByType = entitiesLoadedByType == null ? null : Map.copyOf(entitiesLoadedByType);
+        this.chunksLoadedByWorld = chunksLoadedByWorld == null ? Map.of() : Map.copyOf(chunksLoadedByWorld);
+        this.exclusiveChunksLoaded = Math.max(0L, exclusiveChunksLoaded);
+        this.tpsNullable = tpsNullable == null ? null : Arrays.copyOf(tpsNullable, tpsNullable.length);
+        this.msptAvgNullable = msptAvgNullable;
+        this.msptP95Nullable = msptP95Nullable;
+    }
 
     public PaperTelemetrySnapshot(
             long playersOnline,
@@ -24,12 +46,7 @@ public final class PaperTelemetrySnapshot implements TelemetrySnapshot {
             Double msptAvgNullable,
             Double msptP95Nullable
     ) {
-        this.playersOnline = playersOnline;
-        this.entitiesLoadedByWorld = entitiesLoadedByWorld == null ? null : Map.copyOf(entitiesLoadedByWorld);
-        this.chunksLoadedByWorld = chunksLoadedByWorld == null ? Map.of() : Map.copyOf(chunksLoadedByWorld);
-        this.tpsNullable = tpsNullable == null ? null : Arrays.copyOf(tpsNullable, tpsNullable.length);
-        this.msptAvgNullable = msptAvgNullable;
-        this.msptP95Nullable = msptP95Nullable;
+        this(playersOnline, entitiesLoadedByWorld, null, chunksLoadedByWorld, 0L, tpsNullable, msptAvgNullable, msptP95Nullable);
     }
 
     /**
@@ -38,7 +55,7 @@ public final class PaperTelemetrySnapshot implements TelemetrySnapshot {
      * @return empty snapshot
      */
     public static PaperTelemetrySnapshot empty() {
-        return new PaperTelemetrySnapshot(0L, null, Map.of(), null, null, null);
+        return new PaperTelemetrySnapshot(0L, null, null, Map.of(), 0L, null, null, null);
     }
 
     /**
@@ -60,12 +77,30 @@ public final class PaperTelemetrySnapshot implements TelemetrySnapshot {
     }
 
     /**
+     * Returns entities loaded per type when available.
+     *
+     * @return entities per type
+     */
+    public Optional<Map<String, Long>> entitiesLoadedByType() {
+        return Optional.ofNullable(entitiesLoadedByType);
+    }
+
+    /**
      * Returns chunks loaded per world.
      *
      * @return chunks per world
      */
     public Map<String, Long> chunksLoadedByWorld() {
         return chunksLoadedByWorld;
+    }
+
+    /**
+     * Returns the number of chunks currently visible to exactly one player.
+     *
+     * @return exclusive chunk count
+     */
+    public long exclusiveChunksLoaded() {
+        return exclusiveChunksLoaded;
     }
 
     /**

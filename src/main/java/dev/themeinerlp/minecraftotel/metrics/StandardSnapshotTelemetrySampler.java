@@ -48,6 +48,17 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
             }
         });
 
+        snapshot.entitiesLoadedByType().ifPresent(entitiesByType -> {
+            for (Map.Entry<String, Long> entry : entitiesByType.entrySet()) {
+                collector.recordLongGauge(
+                        StandardMetrics.ENTITIES_LOADED_BY_TYPE,
+                        entry.getValue(),
+                        StandardMetrics.UNIT_COUNT,
+                        Attributes.of(StandardMetrics.ENTITY_TYPE_KEY, entry.getKey())
+                );
+            }
+        });
+
         for (Map.Entry<String, Long> entry : snapshot.chunksLoadedByWorld().entrySet()) {
             collector.recordLongGauge(
                     StandardMetrics.CHUNKS_LOADED,
@@ -56,6 +67,36 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
                     Attributes.of(StandardMetrics.WORLD_KEY, entry.getKey())
             );
         }
+
+        snapshot.entitiesLoadedByWorld().ifPresent(entitiesByWorld -> {
+            long totalEntitiesLoaded = 0L;
+            for (long value : entitiesByWorld.values()) {
+                totalEntitiesLoaded += value;
+            }
+            long totalChunksLoaded = 0L;
+            for (long value : snapshot.chunksLoadedByWorld().values()) {
+                totalChunksLoaded += value;
+            }
+            if (totalChunksLoaded > 0L) {
+                collector.recordDoubleGauge(
+                        StandardMetrics.ENTITIES_PER_CHUNK,
+                        totalEntitiesLoaded / (double) totalChunksLoaded,
+                        StandardMetrics.UNIT_COUNT,
+                        Attributes.empty()
+                );
+            }
+        });
+
+        long exclusiveChunksLoaded = snapshot.exclusiveChunksLoaded();
+        double chunksPerPlayer = snapshot.playersOnline() > 0L
+                ? exclusiveChunksLoaded / (double) snapshot.playersOnline()
+                : 0.0d;
+        collector.recordDoubleGauge(
+                StandardMetrics.CHUNKS_LOADED_PER_PLAYER,
+                chunksPerPlayer,
+                StandardMetrics.UNIT_COUNT,
+                Attributes.empty()
+        );
 
         double[] tps = snapshot.tpsNullable();
         if (tps != null) {

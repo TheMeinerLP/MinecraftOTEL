@@ -36,7 +36,10 @@ public final class EntityCounterListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityAdd(EntityAddToWorldEvent event) {
         String worldName = event.getEntity().getWorld().getName();
+        var typeKeyObj = event.getEntity().getType().getKey();
+        String typeKey = typeKeyObj == null ? "" : typeKeyObj.toString();
         state.incrementEntity(worldName);
+        state.incrementEntityType(typeKey);
         collector.recordLongCounter(
                 StandardMetrics.ENTITIES_ADDED_TOTAL,
                 1L,
@@ -53,7 +56,10 @@ public final class EntityCounterListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityRemove(EntityRemoveFromWorldEvent event) {
         String worldName = event.getEntity().getWorld().getName();
+        var typeKeyObj = event.getEntity().getType().getKey();
+        String typeKey = typeKeyObj == null ? "" : typeKeyObj.toString();
         state.decrementEntity(worldName);
+        state.decrementEntityType(typeKey);
         collector.recordLongCounter(
                 StandardMetrics.ENTITIES_REMOVED_TOTAL,
                 1L,

@@ -8,6 +8,13 @@ import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import dev.themeinerlp.minecraftotel.paper.util.Percentiles;
 import java.util.Arrays;
 import java.util.Map;
+
+import me.lucko.spark.api.Spark;
+import me.lucko.spark.api.SparkProvider;
+import me.lucko.spark.api.statistic.StatisticWindow;
+import me.lucko.spark.api.statistic.misc.DoubleAverageInfo;
+import me.lucko.spark.api.statistic.types.DoubleStatistic;
+import me.lucko.spark.api.statistic.types.GenericStatistic;
 import org.bukkit.Server;
 
 /**
@@ -45,10 +52,13 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
         }
 
         Map<String, Long> baselineEntities = null;
+        Map<String, Long> baselineEntityTypes = null;
         if (!config.enableEntities) {
             baselineEntities = Map.of();
+            baselineEntityTypes = Map.of();
         } else if (baselineDue && !state.isEntityEventsAvailable()) {
             baselineEntities = state.scanEntities(server);
+            baselineEntityTypes = state.scanEntitiesByType(server);
         }
 
         Map<String, Long> baselineChunks = null;
@@ -64,15 +74,18 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
                 sampleResult.msptAvgNullable,
                 sampleResult.msptP95Nullable,
                 baselineEntities,
+                baselineEntityTypes,
                 baselineChunks
         );
 
         paperBuilder.setPlayersOnline(snapshot.playersOnline());
         if (config.enableEntities) {
             snapshot.entitiesLoadedByWorld().ifPresent(paperBuilder::setEntitiesLoadedByWorld);
+            snapshot.entitiesLoadedByType().ifPresent(paperBuilder::setEntitiesLoadedByType);
         }
         paperBuilder
                 .setChunksLoadedByWorld(snapshot.chunksLoadedByWorld())
+                .setExclusiveChunksLoaded(snapshot.exclusiveChunksLoaded())
                 .setTps(snapshot.tpsNullable())
                 .setMsptAvg(snapshot.msptAvgNullable())
                 .setMsptP95(snapshot.msptP95Nullable());
@@ -135,18 +148,21 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
         }
 
         private static boolean isSparkInstalled(Server server) {
-            var plugin = server.getPluginManager().getPlugin("spark");
-            return plugin != null && plugin.isEnabled();
+            try {
+                return SparkProvider.get() != null;
+            } catch (NoClassDefFoundError e) {
+                return false;
+            }
         }
     }
 
     private static final class SparkBridge {
-        private final me.lucko.spark.api.statistic.types.DoubleStatistic<me.lucko.spark.api.statistic.StatisticWindow.TicksPerSecond> tpsStatistic;
-        private final me.lucko.spark.api.statistic.types.GenericStatistic<me.lucko.spark.api.statistic.misc.DoubleAverageInfo, me.lucko.spark.api.statistic.StatisticWindow.MillisPerTick> msptStatistic;
+        private final DoubleStatistic<StatisticWindow.TicksPerSecond> tpsStatistic;
+        private final GenericStatistic<DoubleAverageInfo, StatisticWindow.MillisPerTick> msptStatistic;
 
         private SparkBridge(
-                me.lucko.spark.api.statistic.types.DoubleStatistic<me.lucko.spark.api.statistic.StatisticWindow.TicksPerSecond> tpsStatistic,
-                me.lucko.spark.api.statistic.types.GenericStatistic<me.lucko.spark.api.statistic.misc.DoubleAverageInfo, me.lucko.spark.api.statistic.StatisticWindow.MillisPerTick> msptStatistic
+                DoubleStatistic<StatisticWindow.TicksPerSecond> tpsStatistic,
+                GenericStatistic<DoubleAverageInfo, StatisticWindow.MillisPerTick> msptStatistic
         ) {
             this.tpsStatistic = tpsStatistic;
             this.msptStatistic = msptStatistic;
@@ -158,7 +174,7 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
                 return null;
             }
             try {
-                me.lucko.spark.api.Spark spark = me.lucko.spark.api.SparkProvider.get();
+                Spark spark = SparkProvider.get();
                 var tps = spark.tps();
                 var mspt = spark.mspt();
                 if (tps == null && mspt == null) {
@@ -179,9 +195,9 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
                 return null;
             }
             return new double[]{
-                    tpsStatistic.poll(me.lucko.spark.api.statistic.StatisticWindow.TicksPerSecond.MINUTES_1),
-                    tpsStatistic.poll(me.lucko.spark.api.statistic.StatisticWindow.TicksPerSecond.MINUTES_5),
-                    tpsStatistic.poll(me.lucko.spark.api.statistic.StatisticWindow.TicksPerSecond.MINUTES_15)
+                    tpsStatistic.poll(StatisticWindow.TicksPerSecond.MINUTES_1),
+                    tpsStatistic.poll(StatisticWindow.TicksPerSecond.MINUTES_5),
+                    tpsStatistic.poll(StatisticWindow.TicksPerSecond.MINUTES_15)
             };
         }
 
@@ -189,7 +205,7 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
             if (msptStatistic == null) {
                 return null;
             }
-            var info = msptStatistic.poll(me.lucko.spark.api.statistic.StatisticWindow.MillisPerTick.MINUTES_1);
+            var info = msptStatistic.poll(StatisticWindow.MillisPerTick.MINUTES_1);
             if (info == null) {
                 return null;
             }
