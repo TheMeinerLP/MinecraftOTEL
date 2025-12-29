@@ -9,12 +9,20 @@ import me.lucko.spark.api.statistic.types.DoubleStatistic;
 import me.lucko.spark.api.statistic.types.GenericStatistic;
 import org.bukkit.Server;
 
+/**
+ * Samples TPS/MSPT from Spark with a fallback to Paper sampling.
+ */
 public final class SparkSampler implements ServerSampler {
     private final ServerSampler fallback;
     private final DoubleStatistic<TicksPerSecond> tpsStatistic;
     private final GenericStatistic<DoubleAverageInfo, MillisPerTick> msptStatistic;
     private final boolean available;
 
+    /**
+     * Creates a Spark sampler with a fallback sampler.
+     *
+     * @param fallback sampler used when Spark is unavailable
+     */
     public SparkSampler(ServerSampler fallback) {
         this.fallback = fallback;
         DoubleStatistic<TicksPerSecond> tps = null;

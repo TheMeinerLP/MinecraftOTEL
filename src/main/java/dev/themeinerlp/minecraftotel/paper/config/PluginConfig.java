@@ -3,13 +3,23 @@ package dev.themeinerlp.minecraftotel.paper.config;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * Immutable configuration for the Paper plugin loaded from config.yml.
+ */
 public final class PluginConfig {
+    /** Enables tick duration histogram sampling. */
     public final boolean enableTick;
+    /** Enables entity gauges and add/remove counters. */
     public final boolean enableEntities;
+    /** Enables chunk gauges and load/unload counters. */
     public final boolean enableChunks;
+    /** Enables TPS and MSPT sampling. */
     public final boolean enableTpsMspt;
+    /** Prefers Spark as a sampler when available. */
     public final boolean preferSpark;
+    /** Sampling interval in seconds. */
     public final int intervalSeconds;
+    /** Baseline scan interval in seconds. */
     public final int baselineScanIntervalSeconds;
 
     private PluginConfig(
@@ -30,6 +40,12 @@ public final class PluginConfig {
         this.baselineScanIntervalSeconds = baselineScanIntervalSeconds;
     }
 
+    /**
+     * Loads the plugin configuration from Bukkit config.yml.
+     *
+     * @param plugin owning plugin instance
+     * @return loaded configuration with defaults applied
+     */
     public static PluginConfig load(JavaPlugin plugin) {
         FileConfiguration cfg = plugin.getConfig();
         boolean enableTick = cfg.getBoolean("otel.enable.tick", true);

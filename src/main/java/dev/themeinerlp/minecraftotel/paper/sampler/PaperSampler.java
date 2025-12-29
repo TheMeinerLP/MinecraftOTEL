@@ -3,6 +3,9 @@ package dev.themeinerlp.minecraftotel.paper.sampler;
 import dev.themeinerlp.minecraftotel.paper.util.Percentiles;
 import org.bukkit.Server;
 
+/**
+ * Samples TPS and MSPT from the Paper API directly.
+ */
 public final class PaperSampler implements ServerSampler {
     @Override
     public boolean isAvailable() {

@@ -10,6 +10,9 @@ import java.util.concurrent.atomic.LongAdder;
 import org.bukkit.Server;
 import org.bukkit.World;
 
+/**
+ * Thread-safe state holder for Paper telemetry counters and snapshots.
+ */
 public final class TelemetryState {
     private final AtomicReference<TelemetrySnapshot> snapshotRef;
     private final ConcurrentHashMap<String, LongAdder> entitiesGaugeByWorld;
@@ -25,43 +28,99 @@ public final class TelemetryState {
         this.entityEventsAvailable = new AtomicBoolean(false);
     }
 
+    /**
+     * Returns the latest snapshot used by metric callbacks.
+     *
+     * @return current snapshot
+     */
     public TelemetrySnapshot getSnapshot() {
         return snapshotRef.get();
     }
 
+    /**
+     * Replaces the current snapshot.
+     *
+     * @param snapshot new snapshot to expose
+     */
     public void setSnapshot(TelemetrySnapshot snapshot) {
         snapshotRef.set(snapshot);
     }
 
+    /**
+     * Returns whether entity add/remove events are available.
+     *
+     * @return true when entity events are enabled
+     */
     public boolean isEntityEventsAvailable() {
         return entityEventsAvailable.get();
     }
 
+    /**
+     * Sets whether entity add/remove events are available.
+     *
+     * @param available true when entity events are enabled
+     */
     public void setEntityEventsAvailable(boolean available) {
         entityEventsAvailable.set(available);
     }
 
+    /**
+     * Increments the entity gauge for the given world.
+     *
+     * @param worldName world name
+     */
     public void incrementEntity(String worldName) {
         addGauge(entitiesGaugeByWorld, worldName, 1L);
     }
 
+    /**
+     * Decrements the entity gauge for the given world.
+     *
+     * @param worldName world name
+     */
     public void decrementEntity(String worldName) {
         addGauge(entitiesGaugeByWorld, worldName, -1L);
     }
 
+    /**
+     * Increments the chunk gauge for the given world.
+     *
+     * @param worldName world name
+     */
     public void incrementChunk(String worldName) {
         addGauge(chunksGaugeByWorld, worldName, 1L);
     }
 
+    /**
+     * Decrements the chunk gauge for the given world.
+     *
+     * @param worldName world name
+     */
     public void decrementChunk(String worldName) {
         addGauge(chunksGaugeByWorld, worldName, -1L);
     }
 
+    /**
+     * Seeds gauges with a baseline scan from the server.
+     *
+     * @param server Bukkit server
+     */
     public void baselineInit(Server server) {
         replaceGauge(entitiesGaugeByWorld, scanEntities(server));
         replaceGauge(chunksGaugeByWorld, scanChunks(server));
     }
 
+    /**
+     * Rebuilds a snapshot from gauges and optionally refreshed baselines.
+     *
+     * @param playersOnline online player count
+     * @param tpsNullable TPS samples or null
+     * @param msptAvgNullable average MSPT or null
+     * @param msptP95Nullable p95 MSPT or null
+     * @param baselineEntitiesMapOrNull baseline entities map or null to reuse gauge
+     * @param baselineChunksMapOrNull baseline chunks map or null to reuse gauge
+     * @return rebuilt snapshot
+     */
     public TelemetrySnapshot rebuildSnapshot(
             long playersOnline,
             double[] tpsNullable,
@@ -87,6 +146,12 @@ public final class TelemetryState {
         );
     }
 
+    /**
+     * Performs a synchronous scan of entities per world.
+     *
+     * @param server Bukkit server
+     * @return entities per world
+     */
     public Map<String, Long> scanEntities(Server server) {
         Map<String, Long> baseline = new HashMap<>();
         for (World world : server.getWorlds()) {
@@ -95,6 +160,12 @@ public final class TelemetryState {
         return baseline;
     }
 
+    /**
+     * Performs a synchronous scan of loaded chunks per world.
+     *
+     * @param server Bukkit server
+     * @return loaded chunks per world
+     */
     public Map<String, Long> scanChunks(Server server) {
         Map<String, Long> baseline = new HashMap<>();
         for (World world : server.getWorlds()) {
