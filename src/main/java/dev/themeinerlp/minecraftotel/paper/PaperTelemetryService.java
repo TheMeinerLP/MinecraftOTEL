@@ -49,7 +49,7 @@ public final class PaperTelemetryService implements TelemetryService {
         this.state = new TelemetryState();
         Meter meter = GlobalOpenTelemetry.get()
                 .meterBuilder("minecraft-otel-paper")
-                .setInstrumentationVersion(plugin.getDescription().getVersion())
+                .setInstrumentationVersion(plugin.getPluginMeta().getVersion())
                 .build();
         this.collector = new MeterTelemetryCollector(meter);
         this.snapshotSamplers = new CopyOnWriteArrayList<>();
@@ -96,9 +96,9 @@ public final class PaperTelemetryService implements TelemetryService {
 
         startSamplingTask();
 
-        plugin.getLogger().info("Sampler: " + snapshotSampler.samplerName());
-        plugin.getLogger().info("Paper entity events enabled: " + config.enableEntities);
-        plugin.getLogger().info("Paper tick events enabled: " + config.enableTick);
+        plugin.getSLF4JLogger().info("Sampler: {}", snapshotSampler.samplerName());
+        plugin.getSLF4JLogger().info("Paper entity events enabled: {}", config.enableEntities);
+        plugin.getSLF4JLogger().info("Paper tick events enabled: {}", config.enableTick);
     }
 
     @Override
