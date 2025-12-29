@@ -9,8 +9,19 @@ services:
       - tempo-data:/var/tempo
     ports:
       - "3200:3200"
+
+  alloy:
+    image: grafana/alloy:latest
+    command: ["run", "--server.http.listen-addr=0.0.0.0:12346", "/etc/alloy/config.alloy"]
+    volumes:
+      - ./docker/alloy.alloy:/etc/alloy/config.alloy:ro
+    ports:
       - "4317:4317"
       - "4318:4318"
+      - "12345:12345"
+      - "12346:12346"
+    depends_on:
+      - tempo
 
   loki:
     image: grafana/loki:2.9.2
@@ -28,8 +39,8 @@ services:
       - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - "9090:9090"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    depends_on:
+      - alloy
 
   grafana:
     image: grafana/grafana:10.3.1
@@ -42,6 +53,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
+      - alloy
       - prometheus
       - tempo
       - loki

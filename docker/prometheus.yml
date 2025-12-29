@@ -6,4 +6,4 @@ scrape_configs:
     metrics_path: /metrics
     static_configs:
       - targets:
-          - host.docker.internal:9464
+          - alloy:12345

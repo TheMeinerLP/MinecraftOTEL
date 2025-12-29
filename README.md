@@ -92,8 +92,8 @@ Example (adjust exporter settings):
 ```
 
 ## Local Observability Stack (Docker Compose)
-This repository ships a local stack with Tempo, Loki, Grafana, and Prometheus
-so you can validate OpenTelemetry output quickly.
+This repository ships a local stack with Alloy, Tempo, Loki, Grafana, and
+Prometheus so you can validate OpenTelemetry output quickly.
 
 Start the stack:
 ```
@@ -107,12 +107,10 @@ Download or update the Java Agent:
 ./scripts/update-java-agent.sh v2.12.0
 ```
 
-Example JVM flags (metrics via Prometheus pull, traces via OTLP to Tempo):
+Example JVM flags (metrics + traces via OTLP to Alloy):
 ```
 -javaagent:./opentelemetry-javaagent.jar \
--Dotel.metrics.exporter=prometheus \
--Dotel.exporter.prometheus.host=0.0.0.0 \
--Dotel.exporter.prometheus.port=9464 \
+-Dotel.metrics.exporter=otlp \
 -Dotel.traces.exporter=otlp \
 -Dotel.exporter.otlp.endpoint=http://localhost:4317 \
 -Dotel.exporter.otlp.protocol=grpc
@@ -121,10 +119,10 @@ Example JVM flags (metrics via Prometheus pull, traces via OTLP to Tempo):
 Open Grafana at http://localhost:3000 (anonymous access is enabled).
 
 Notes:
-- Prometheus scrapes `host.docker.internal:9464` by default. On Linux you may
-  need to add a host mapping or update `docker/prometheus.yml`.
-- Loki is included for log testing. If you export logs via OTLP, route them
-  through a collector or log shipper that writes to Loki.
+- Alloy listens on `4317/4318` for OTLP and forwards traces to Tempo.
+- Prometheus scrapes Alloy at `alloy:12345` (exposed as `localhost:12345`).
+- Loki is included for log testing. If you export logs via OTLP, add a logs
+  pipeline in `docker/alloy.alloy`.
 
 ## API Usage (Paper + Velocity)
 MinecraftOTEL exposes a small API so other plugins can create meters or react to
