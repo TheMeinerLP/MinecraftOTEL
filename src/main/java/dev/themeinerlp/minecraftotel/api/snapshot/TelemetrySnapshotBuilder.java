@@ -17,6 +17,7 @@ public final class TelemetrySnapshotBuilder {
     private Double msptP95;
     private Map<String, Long> playersByServer;
     private Long registeredServers;
+    private Object platformData;
 
     /**
      * Creates an empty builder.
@@ -64,13 +65,18 @@ public final class TelemetrySnapshotBuilder {
         return this;
     }
 
+    public TelemetrySnapshotBuilder setPlatformData(Object platformData) {
+        this.platformData = platformData;
+        return this;
+    }
+
     /**
      * Builds an immutable snapshot, filling missing values with defaults.
      *
      * @return telemetry snapshot
      */
-    public TelemetrySnapshot build() {
-        return new TelemetrySnapshot(
+    public TelemetrySnapshot<Object> build() {
+        return TelemetrySnapshot.of(
                 playersOnline == null ? 0L : playersOnline,
                 entitiesLoadedByWorld == null ? Map.of() : entitiesLoadedByWorld,
                 chunksLoadedByWorld == null ? Map.of() : chunksLoadedByWorld,
@@ -78,7 +84,8 @@ public final class TelemetrySnapshotBuilder {
                 msptAvg,
                 msptP95,
                 playersByServer == null ? Map.of() : playersByServer,
-                registeredServers == null ? 0L : registeredServers
+                registeredServers == null ? 0L : registeredServers,
+                platformData
         );
     }
 }

@@ -15,5 +15,5 @@ public interface TelemetryListener {
      *
      * @param snapshot latest snapshot
      */
-    void onSample(TelemetrySnapshot snapshot);
+    void onSample(TelemetrySnapshot<?> snapshot);
 }

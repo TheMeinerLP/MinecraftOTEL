@@ -14,7 +14,7 @@ import org.bukkit.World;
 public final class TelemetryState implements TelemetryStateStore {
     private final Map<String, Long> entitiesGaugeByWorld;
     private final Map<String, Long> chunksGaugeByWorld;
-    private volatile TelemetrySnapshot snapshot;
+    private volatile TelemetrySnapshot<?> snapshot;
     private volatile boolean entityEventsAvailable;
 
     public TelemetryState() {
@@ -30,7 +30,7 @@ public final class TelemetryState implements TelemetryStateStore {
      * @return current snapshot
      */
     @Override
-    public TelemetrySnapshot getSnapshot() {
+    public TelemetrySnapshot<?> getSnapshot() {
         return snapshot;
     }
 
@@ -40,7 +40,7 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param snapshot new snapshot to expose
      */
     @Override
-    public void setSnapshot(TelemetrySnapshot snapshot) {
+    public void setSnapshot(TelemetrySnapshot<?> snapshot) {
         this.snapshot = snapshot;
     }
 
@@ -119,7 +119,7 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param baselineChunksMapOrNull baseline chunks map or null to reuse gauge
      * @return rebuilt snapshot
      */
-    public TelemetrySnapshot rebuildSnapshot(
+    public TelemetrySnapshot<?> rebuildSnapshot(
             long playersOnline,
             double[] tpsNullable,
             Double msptAvgNullable,
@@ -134,7 +134,7 @@ public final class TelemetryState implements TelemetryStateStore {
                 ? applyBaseline(chunksGaugeByWorld, baselineChunksMapOrNull)
                 : snapshotFromGauge(chunksGaugeByWorld);
         double[] tpsCopy = tpsNullable == null ? null : Arrays.copyOf(tpsNullable, tpsNullable.length);
-        return new TelemetrySnapshot(
+        return TelemetrySnapshot.of(
                 playersOnline,
                 entitiesSnapshot,
                 chunksSnapshot,
@@ -142,7 +142,8 @@ public final class TelemetryState implements TelemetryStateStore {
                 msptAvgNullable,
                 msptP95Nullable,
                 Map.of(),
-                0L
+                0L,
+                null
         );
     }
 

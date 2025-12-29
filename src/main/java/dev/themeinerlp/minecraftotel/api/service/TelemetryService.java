@@ -30,7 +30,7 @@ public interface TelemetryService {
      *
      * @return snapshot
      */
-    TelemetrySnapshot getSnapshot();
+    TelemetrySnapshot<?> getSnapshot();
 
     /**
      * Adds a snapshot sampler to contribute to the next snapshot build.

@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public final class SnapshotTelemetrySampler implements TelemetrySampler {
     @Override
-    public void sample(TelemetrySnapshot snapshot, TelemetryCollector collector) {
+    public void sample(TelemetrySnapshot<?> snapshot, TelemetryCollector collector) {
         if (snapshot == null || collector == null) {
             return;
         }

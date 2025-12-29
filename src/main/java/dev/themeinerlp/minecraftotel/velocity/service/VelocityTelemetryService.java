@@ -107,7 +107,7 @@ public final class VelocityTelemetryService implements TelemetryService {
     }
 
     @Override
-    public TelemetrySnapshot getSnapshot() {
+    public TelemetrySnapshot<?> getSnapshot() {
         return state.getSnapshot();
     }
 
@@ -174,7 +174,7 @@ public final class VelocityTelemetryService implements TelemetryService {
         for (TelemetrySnapshotSampler sampler : snapshotSamplers) {
             sampler.sample(builder);
         }
-        TelemetrySnapshot snapshot = builder.build();
+        TelemetrySnapshot<?> snapshot = builder.build();
         state.setSnapshot(snapshot);
         for (TelemetryListener listener : listeners) {
             listener.onSample(snapshot);
