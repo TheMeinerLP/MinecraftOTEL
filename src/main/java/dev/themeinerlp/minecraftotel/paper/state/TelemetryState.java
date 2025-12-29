@@ -3,6 +3,7 @@ package dev.themeinerlp.minecraftotel.paper.state;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.api.state.TelemetryStateStore;
 import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot.ChunkEntityKey;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Entity;
 public final class TelemetryState implements TelemetryStateStore {
     private final Map<String, Long> entitiesGaugeByWorld;
     private final Map<String, Long> entitiesGaugeByType;
+    private final Map<ChunkEntityKey, Long> entitiesGaugeByTypeAndChunk;
     private final Map<String, Long> chunksGaugeByWorld;
     private final Map<ChunkKey, Integer> playerChunkViewers;
     private long exclusivePlayerChunks;
@@ -26,6 +28,7 @@ public final class TelemetryState implements TelemetryStateStore {
         this.snapshot = PaperTelemetrySnapshot.empty();
         this.entitiesGaugeByWorld = new HashMap<>();
         this.entitiesGaugeByType = new HashMap<>();
+        this.entitiesGaugeByTypeAndChunk = new HashMap<>();
         this.chunksGaugeByWorld = new HashMap<>();
         this.playerChunkViewers = new HashMap<>();
         this.exclusivePlayerChunks = 0L;
@@ -76,6 +79,9 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param worldName world name
      */
     public void incrementEntity(String worldName) {
+        if (worldName == null || worldName.isBlank()) {
+            return;
+        }
         updateGauge(entitiesGaugeByWorld, worldName, 1L);
     }
 
@@ -85,6 +91,9 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param worldName world name
      */
     public void decrementEntity(String worldName) {
+        if (worldName == null || worldName.isBlank()) {
+            return;
+        }
         updateGauge(entitiesGaugeByWorld, worldName, -1L);
     }
 
@@ -94,6 +103,9 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param entityTypeKey namespaced entity type key
      */
     public void incrementEntityType(String entityTypeKey) {
+        if (entityTypeKey == null || entityTypeKey.isBlank()) {
+            return;
+        }
         updateGauge(entitiesGaugeByType, entityTypeKey, 1L);
     }
 
@@ -103,7 +115,56 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param entityTypeKey namespaced entity type key
      */
     public void decrementEntityType(String entityTypeKey) {
+        if (entityTypeKey == null || entityTypeKey.isBlank()) {
+            return;
+        }
         updateGauge(entitiesGaugeByType, entityTypeKey, -1L);
+    }
+
+    /**
+     * Increments the entity type gauge for the given chunk.
+     *
+     * @param worldName world name
+     * @param chunkX chunk X coordinate
+     * @param chunkZ chunk Z coordinate
+     * @param entityTypeKey namespaced entity type key
+     */
+    public void incrementEntityTypeInChunk(
+            String worldName,
+            int chunkX,
+            int chunkZ,
+            String entityTypeKey
+    ) {
+        if (worldName == null || worldName.isBlank()) {
+            return;
+        }
+        if (entityTypeKey == null || entityTypeKey.isBlank()) {
+            return;
+        }
+        updateGauge(entitiesGaugeByTypeAndChunk, new ChunkEntityKey(worldName, chunkX, chunkZ, entityTypeKey), 1L);
+    }
+
+    /**
+     * Decrements the entity type gauge for the given chunk.
+     *
+     * @param worldName world name
+     * @param chunkX chunk X coordinate
+     * @param chunkZ chunk Z coordinate
+     * @param entityTypeKey namespaced entity type key
+     */
+    public void decrementEntityTypeInChunk(
+            String worldName,
+            int chunkX,
+            int chunkZ,
+            String entityTypeKey
+    ) {
+        if (worldName == null || worldName.isBlank()) {
+            return;
+        }
+        if (entityTypeKey == null || entityTypeKey.isBlank()) {
+            return;
+        }
+        updateGauge(entitiesGaugeByTypeAndChunk, new ChunkEntityKey(worldName, chunkX, chunkZ, entityTypeKey), -1L);
     }
 
     /**
@@ -112,6 +173,9 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param worldName world name
      */
     public void incrementChunk(String worldName) {
+        if (worldName == null || worldName.isBlank()) {
+            return;
+        }
         updateGauge(chunksGaugeByWorld, worldName, 1L);
     }
 
@@ -121,6 +185,9 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param worldName world name
      */
     public void decrementChunk(String worldName) {
+        if (worldName == null || worldName.isBlank()) {
+            return;
+        }
         updateGauge(chunksGaugeByWorld, worldName, -1L);
     }
 
@@ -198,6 +265,7 @@ public final class TelemetryState implements TelemetryStateStore {
     public void baselineInit(Server server) {
         replaceGauge(entitiesGaugeByWorld, scanEntities(server));
         replaceGauge(entitiesGaugeByType, scanEntitiesByType(server));
+        replaceGauge(entitiesGaugeByTypeAndChunk, scanEntitiesByTypeAndChunk(server));
         replaceGauge(chunksGaugeByWorld, scanChunks(server));
     }
 
@@ -210,6 +278,7 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param msptP95Nullable p95 MSPT or null
      * @param baselineEntitiesMapOrNull baseline entities map or null to reuse gauge
      * @param baselineEntityTypesMapOrNull baseline entity types map or null to reuse gauge
+     * @param baselineEntityTypesByChunkMapOrNull baseline entity types by chunk map or null to reuse gauge
      * @param baselineChunksMapOrNull baseline chunks map or null to reuse gauge
      * @return rebuilt snapshot
      */
@@ -220,6 +289,7 @@ public final class TelemetryState implements TelemetryStateStore {
             Double msptP95Nullable,
             Map<String, Long> baselineEntitiesMapOrNull,
             Map<String, Long> baselineEntityTypesMapOrNull,
+            Map<ChunkEntityKey, Long> baselineEntityTypesByChunkMapOrNull,
             Map<String, Long> baselineChunksMapOrNull
     ) {
         Map<String, Long> entitiesSnapshot = baselineEntitiesMapOrNull != null
@@ -228,6 +298,9 @@ public final class TelemetryState implements TelemetryStateStore {
         Map<String, Long> entitiesByTypeSnapshot = baselineEntityTypesMapOrNull != null
                 ? applyBaseline(entitiesGaugeByType, baselineEntityTypesMapOrNull)
                 : snapshotFromGauge(entitiesGaugeByType);
+        Map<ChunkEntityKey, Long> entitiesByTypeAndChunkSnapshot = baselineEntityTypesByChunkMapOrNull != null
+                ? applyBaseline(entitiesGaugeByTypeAndChunk, baselineEntityTypesByChunkMapOrNull)
+                : snapshotFromGauge(entitiesGaugeByTypeAndChunk);
         Map<String, Long> chunksSnapshot = baselineChunksMapOrNull != null
                 ? applyBaseline(chunksGaugeByWorld, baselineChunksMapOrNull)
                 : snapshotFromGauge(chunksGaugeByWorld);
@@ -236,6 +309,7 @@ public final class TelemetryState implements TelemetryStateStore {
                 playersOnline,
                 entitiesSnapshot,
                 entitiesByTypeSnapshot,
+                entitiesByTypeAndChunkSnapshot,
                 chunksSnapshot,
                 getExclusivePlayerChunks(),
                 tpsCopy,
@@ -270,10 +344,37 @@ public final class TelemetryState implements TelemetryStateStore {
             for (Entity entity : world.getEntities()) {
                 var typeKeyObj = entity.getType().getKey();
                 String typeKey = typeKeyObj == null ? "" : typeKeyObj.toString();
-                if (typeKey == null || typeKey.isBlank()) {
+                if (typeKey.isBlank()) {
                     continue;
                 }
                 baseline.merge(typeKey, 1L, Long::sum);
+            }
+        }
+        return baseline;
+    }
+
+    /**
+     * Performs a synchronous scan of entities per type and chunk.
+     *
+     * @param server Bukkit server
+     * @return entities per type and chunk
+     */
+    public Map<ChunkEntityKey, Long> scanEntitiesByTypeAndChunk(Server server) {
+        Map<ChunkEntityKey, Long> baseline = new HashMap<>();
+        for (World world : server.getWorlds()) {
+            String worldName = world.getName();
+            if (worldName == null || worldName.isBlank()) {
+                continue;
+            }
+            for (Entity entity : world.getEntities()) {
+                var typeKeyObj = entity.getType().getKey();
+                String typeKey = typeKeyObj == null ? "" : typeKeyObj.toString();
+                if (typeKey.isBlank()) {
+                    continue;
+                }
+                var chunk = entity.getChunk();
+                ChunkEntityKey key = new ChunkEntityKey(worldName, chunk.getX(), chunk.getZ(), typeKey);
+                baseline.merge(key, 1L, Long::sum);
             }
         }
         return baseline;
@@ -293,19 +394,19 @@ public final class TelemetryState implements TelemetryStateStore {
         return baseline;
     }
 
-    private static void updateGauge(Map<String, Long> gauge, String worldName, long delta) {
-        if (worldName == null || worldName.isBlank()) {
+    private static <K> void updateGauge(Map<K, Long> gauge, K key, long delta) {
+        if (key == null) {
             return;
         }
         synchronized (gauge) {
-            gauge.merge(worldName, delta, Long::sum);
+            gauge.merge(key, delta, Long::sum);
         }
     }
 
-    private static Map<String, Long> snapshotFromGauge(Map<String, Long> gauge) {
-        Map<String, Long> snapshot = new HashMap<>();
+    private static <K> Map<K, Long> snapshotFromGauge(Map<K, Long> gauge) {
+        Map<K, Long> snapshot = new HashMap<>();
         synchronized (gauge) {
-            for (Map.Entry<String, Long> entry : gauge.entrySet()) {
+            for (Map.Entry<K, Long> entry : gauge.entrySet()) {
                 long value = entry.getValue();
                 snapshot.put(entry.getKey(), Math.max(0L, value));
             }
@@ -313,12 +414,12 @@ public final class TelemetryState implements TelemetryStateStore {
         return Map.copyOf(snapshot);
     }
 
-    private static Map<String, Long> applyBaseline(
-            Map<String, Long> gauge,
-            Map<String, Long> baseline
+    private static <K> Map<K, Long> applyBaseline(
+            Map<K, Long> gauge,
+            Map<K, Long> baseline
     ) {
-        Map<String, Long> normalized = new HashMap<>();
-        for (Map.Entry<String, Long> entry : baseline.entrySet()) {
+        Map<K, Long> normalized = new HashMap<>();
+        for (Map.Entry<K, Long> entry : baseline.entrySet()) {
             long value = Math.max(0L, entry.getValue());
             normalized.put(entry.getKey(), value);
         }
@@ -326,13 +427,13 @@ public final class TelemetryState implements TelemetryStateStore {
         return Map.copyOf(normalized);
     }
 
-    private static void replaceGauge(
-            Map<String, Long> gauge,
-            Map<String, Long> baseline
+    private static <K> void replaceGauge(
+            Map<K, Long> gauge,
+            Map<K, Long> baseline
     ) {
         synchronized (gauge) {
             gauge.clear();
-            for (Map.Entry<String, Long> entry : baseline.entrySet()) {
+            for (Map.Entry<K, Long> entry : baseline.entrySet()) {
                 gauge.put(entry.getKey(), Math.max(0L, entry.getValue()));
             }
         }

@@ -10,6 +10,7 @@ public final class PaperTelemetrySnapshotBuilder implements TelemetrySnapshotBui
     private Long playersOnline;
     private Map<String, Long> entitiesLoadedByWorld;
     private Map<String, Long> entitiesLoadedByType;
+    private Map<PaperTelemetrySnapshot.ChunkEntityKey, Long> entitiesLoadedByTypeAndChunk;
     private Map<String, Long> chunksLoadedByWorld;
     private Long exclusiveChunksLoaded;
     private double[] tpsNullable;
@@ -46,6 +47,19 @@ public final class PaperTelemetrySnapshotBuilder implements TelemetrySnapshotBui
      */
     public PaperTelemetrySnapshotBuilder setEntitiesLoadedByType(Map<String, Long> entitiesLoadedByType) {
         this.entitiesLoadedByType = entitiesLoadedByType;
+        return this;
+    }
+
+    /**
+     * Sets entities loaded per type and chunk.
+     *
+     * @param entitiesLoadedByTypeAndChunk entities per type and chunk
+     * @return builder
+     */
+    public PaperTelemetrySnapshotBuilder setEntitiesLoadedByTypeAndChunk(
+            Map<PaperTelemetrySnapshot.ChunkEntityKey, Long> entitiesLoadedByTypeAndChunk
+    ) {
+        this.entitiesLoadedByTypeAndChunk = entitiesLoadedByTypeAndChunk;
         return this;
     }
 
@@ -114,6 +128,7 @@ public final class PaperTelemetrySnapshotBuilder implements TelemetrySnapshotBui
                 playersOnline == null ? 0L : playersOnline,
                 entitiesLoadedByWorld,
                 entitiesLoadedByType,
+                entitiesLoadedByTypeAndChunk,
                 chunksLoadedByWorld == null ? Map.of() : chunksLoadedByWorld,
                 exclusiveChunksLoaded == null ? 0L : exclusiveChunksLoaded,
                 tpsNullable,

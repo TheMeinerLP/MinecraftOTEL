@@ -5,6 +5,7 @@ import dev.themeinerlp.minecraftotel.api.metrics.StandardMetrics;
 import dev.themeinerlp.minecraftotel.api.sampler.TelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot.ChunkEntityKey;
 import dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshot;
 import io.opentelemetry.api.common.Attributes;
 import java.util.Map;
@@ -55,6 +56,27 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
                         entry.getValue(),
                         StandardMetrics.UNIT_COUNT,
                         Attributes.of(StandardMetrics.ENTITY_TYPE_KEY, entry.getKey())
+                );
+            }
+        });
+
+        snapshot.entitiesLoadedByTypeAndChunk().ifPresent(entitiesByTypeAndChunk -> {
+            for (Map.Entry<ChunkEntityKey, Long> entry : entitiesByTypeAndChunk.entrySet()) {
+                var key = entry.getKey();
+                collector.recordLongGauge(
+                        StandardMetrics.ENTITIES_LOADED_BY_TYPE_CHUNK,
+                        entry.getValue(),
+                        StandardMetrics.UNIT_COUNT,
+                        Attributes.of(
+                                StandardMetrics.WORLD_KEY,
+                                key.worldName(),
+                                StandardMetrics.CHUNK_X_KEY,
+                                (long) key.chunkX(),
+                                StandardMetrics.CHUNK_Z_KEY,
+                                (long) key.chunkZ(),
+                                StandardMetrics.ENTITY_TYPE_KEY,
+                                key.entityType()
+                        )
                 );
             }
         });

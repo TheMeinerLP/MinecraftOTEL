@@ -4,6 +4,7 @@ import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotBuilder;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
 import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshotBuilder;
+import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot.ChunkEntityKey;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import dev.themeinerlp.minecraftotel.paper.util.Percentiles;
 import java.util.Arrays;
@@ -53,12 +54,17 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
 
         Map<String, Long> baselineEntities = null;
         Map<String, Long> baselineEntityTypes = null;
+        Map<ChunkEntityKey, Long> baselineEntityTypesByChunk = null;
         if (!config.enableEntities) {
             baselineEntities = Map.of();
             baselineEntityTypes = Map.of();
+            baselineEntityTypesByChunk = Map.of();
         } else if (baselineDue && !state.isEntityEventsAvailable()) {
             baselineEntities = state.scanEntities(server);
             baselineEntityTypes = state.scanEntitiesByType(server);
+        }
+        if (config.enableEntities && baselineDue) {
+            baselineEntityTypesByChunk = state.scanEntitiesByTypeAndChunk(server);
         }
 
         Map<String, Long> baselineChunks = null;
@@ -75,6 +81,7 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
                 sampleResult.msptP95Nullable,
                 baselineEntities,
                 baselineEntityTypes,
+                baselineEntityTypesByChunk,
                 baselineChunks
         );
 
@@ -82,6 +89,7 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
         if (config.enableEntities) {
             snapshot.entitiesLoadedByWorld().ifPresent(paperBuilder::setEntitiesLoadedByWorld);
             snapshot.entitiesLoadedByType().ifPresent(paperBuilder::setEntitiesLoadedByType);
+            snapshot.entitiesLoadedByTypeAndChunk().ifPresent(paperBuilder::setEntitiesLoadedByTypeAndChunk);
         }
         paperBuilder
                 .setChunksLoadedByWorld(snapshot.chunksLoadedByWorld())

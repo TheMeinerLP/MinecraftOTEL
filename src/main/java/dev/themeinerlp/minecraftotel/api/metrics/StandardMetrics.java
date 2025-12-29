@@ -15,6 +15,7 @@ public final class StandardMetrics {
     public static final String PLAYERS_ONLINE = "minecraft.players.online";
     public static final String ENTITIES_LOADED = "minecraft.entities.loaded";
     public static final String ENTITIES_LOADED_BY_TYPE = "minecraft.entities.loaded_by_type";
+    public static final String ENTITIES_LOADED_BY_TYPE_CHUNK = "minecraft.entities.loaded_by_type_chunk";
     public static final String ENTITIES_PER_CHUNK = "minecraft.entities.per_chunk";
     public static final String CHUNKS_LOADED = "minecraft.chunks.loaded";
     public static final String CHUNKS_LOADED_PER_PLAYER = "minecraft.chunks.loaded_per_player";
@@ -34,6 +35,8 @@ public final class StandardMetrics {
     public static final AttributeKey<String> WINDOW_KEY = AttributeKey.stringKey("window");
     public static final AttributeKey<String> SERVER_KEY = AttributeKey.stringKey("server");
     public static final AttributeKey<String> ENTITY_TYPE_KEY = AttributeKey.stringKey("entity_type");
+    public static final AttributeKey<Long> CHUNK_X_KEY = AttributeKey.longKey("chunk_x");
+    public static final AttributeKey<Long> CHUNK_Z_KEY = AttributeKey.longKey("chunk_z");
 
     public static final String[] TPS_WINDOWS = {"1m", "5m", "15m"};
 
