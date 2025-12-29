@@ -3,6 +3,7 @@ package dev.themeinerlp.minecraftotel.paper.sampler;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotBuilder;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
+import dev.themeinerlp.minecraftotel.paper.config.EntitiesByChunkMode;
 import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshotBuilder;
 import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot.ChunkEntityKey;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
@@ -63,7 +64,7 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
             baselineEntities = state.scanEntities(server);
             baselineEntityTypes = state.scanEntitiesByType(server);
         }
-        if (config.enableEntities && baselineDue) {
+        if (config.enableEntities && config.entitiesByChunkMode != EntitiesByChunkMode.OFF && baselineDue) {
             baselineEntityTypesByChunk = state.scanEntitiesByTypeAndChunk(server);
         }
 
@@ -89,7 +90,9 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
         if (config.enableEntities) {
             snapshot.entitiesLoadedByWorld().ifPresent(paperBuilder::setEntitiesLoadedByWorld);
             snapshot.entitiesLoadedByType().ifPresent(paperBuilder::setEntitiesLoadedByType);
-            snapshot.entitiesLoadedByTypeAndChunk().ifPresent(paperBuilder::setEntitiesLoadedByTypeAndChunk);
+            if (config.entitiesByChunkMode != EntitiesByChunkMode.OFF) {
+                snapshot.entitiesLoadedByTypeAndChunk().ifPresent(paperBuilder::setEntitiesLoadedByTypeAndChunk);
+            }
         }
         paperBuilder
                 .setChunksLoadedByWorld(snapshot.chunksLoadedByWorld())

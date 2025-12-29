@@ -2,6 +2,7 @@ package dev.themeinerlp.minecraftotel.paper.state;
 
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.api.state.TelemetryStateStore;
+import dev.themeinerlp.minecraftotel.paper.config.EntitiesByChunkMode;
 import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot.ChunkEntityKey;
 import java.util.Arrays;
@@ -10,6 +11,9 @@ import java.util.Map;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Enemy;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 
 /**
  * Thread-safe state holder for Paper telemetry counters and snapshots.
@@ -23,6 +27,7 @@ public final class TelemetryState implements TelemetryStateStore {
     private long exclusivePlayerChunks;
     private volatile TelemetrySnapshot snapshot;
     private volatile boolean entityEventsAvailable;
+    private volatile EntitiesByChunkMode entityTypeChunkMode;
 
     public TelemetryState() {
         this.snapshot = PaperTelemetrySnapshot.empty();
@@ -33,6 +38,7 @@ public final class TelemetryState implements TelemetryStateStore {
         this.playerChunkViewers = new HashMap<>();
         this.exclusivePlayerChunks = 0L;
         this.entityEventsAvailable = false;
+        this.entityTypeChunkMode = EntitiesByChunkMode.OFF;
     }
 
     /**
@@ -71,6 +77,38 @@ public final class TelemetryState implements TelemetryStateStore {
      */
     public void setEntityEventsAvailable(boolean available) {
         entityEventsAvailable = available;
+    }
+
+    /**
+     * Returns whether entity type per chunk tracking is enabled.
+     *
+     * @return true when tracking is enabled
+     */
+    public boolean isEntityTypeChunkTrackingEnabled() {
+        return entityTypeChunkMode != EntitiesByChunkMode.OFF;
+    }
+
+    /**
+     * Sets the mode for entity type per chunk tracking.
+     *
+     * @param mode tracking mode
+     */
+    public void setEntityTypeChunkMode(EntitiesByChunkMode mode) {
+        entityTypeChunkMode = mode == null ? EntitiesByChunkMode.OFF : mode;
+        if (entityTypeChunkMode == EntitiesByChunkMode.OFF) {
+            synchronized (entitiesGaugeByTypeAndChunk) {
+                entitiesGaugeByTypeAndChunk.clear();
+            }
+        }
+    }
+
+    /**
+     * Returns the current entity type per chunk tracking mode.
+     *
+     * @return tracking mode
+     */
+    public EntitiesByChunkMode getEntityTypeChunkMode() {
+        return entityTypeChunkMode;
     }
 
     /**
@@ -129,19 +167,24 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param chunkZ chunk Z coordinate
      * @param entityTypeKey namespaced entity type key
      */
-    public void incrementEntityTypeInChunk(
-            String worldName,
-            int chunkX,
-            int chunkZ,
-            String entityTypeKey
-    ) {
+    public void incrementEntityTypeInChunk(Entity entity) {
+        if (entity == null || entityTypeChunkMode == EntitiesByChunkMode.OFF) {
+            return;
+        }
+        String typeKey = resolveChunkEntityTypeKey(entity);
+        if (typeKey == null || typeKey.isBlank()) {
+            return;
+        }
+        var chunk = entity.getChunk();
+        String worldName = chunk.getWorld().getName();
         if (worldName == null || worldName.isBlank()) {
             return;
         }
-        if (entityTypeKey == null || entityTypeKey.isBlank()) {
-            return;
-        }
-        updateGauge(entitiesGaugeByTypeAndChunk, new ChunkEntityKey(worldName, chunkX, chunkZ, entityTypeKey), 1L);
+        updateGauge(
+                entitiesGaugeByTypeAndChunk,
+                new ChunkEntityKey(worldName, chunk.getX(), chunk.getZ(), typeKey),
+                1L
+        );
     }
 
     /**
@@ -152,19 +195,24 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param chunkZ chunk Z coordinate
      * @param entityTypeKey namespaced entity type key
      */
-    public void decrementEntityTypeInChunk(
-            String worldName,
-            int chunkX,
-            int chunkZ,
-            String entityTypeKey
-    ) {
+    public void decrementEntityTypeInChunk(Entity entity) {
+        if (entity == null || entityTypeChunkMode == EntitiesByChunkMode.OFF) {
+            return;
+        }
+        String typeKey = resolveChunkEntityTypeKey(entity);
+        if (typeKey == null || typeKey.isBlank()) {
+            return;
+        }
+        var chunk = entity.getChunk();
+        String worldName = chunk.getWorld().getName();
         if (worldName == null || worldName.isBlank()) {
             return;
         }
-        if (entityTypeKey == null || entityTypeKey.isBlank()) {
-            return;
-        }
-        updateGauge(entitiesGaugeByTypeAndChunk, new ChunkEntityKey(worldName, chunkX, chunkZ, entityTypeKey), -1L);
+        updateGauge(
+                entitiesGaugeByTypeAndChunk,
+                new ChunkEntityKey(worldName, chunk.getX(), chunk.getZ(), typeKey),
+                -1L
+        );
     }
 
     /**
@@ -265,7 +313,11 @@ public final class TelemetryState implements TelemetryStateStore {
     public void baselineInit(Server server) {
         replaceGauge(entitiesGaugeByWorld, scanEntities(server));
         replaceGauge(entitiesGaugeByType, scanEntitiesByType(server));
-        replaceGauge(entitiesGaugeByTypeAndChunk, scanEntitiesByTypeAndChunk(server));
+        if (entityTypeChunkMode != EntitiesByChunkMode.OFF) {
+            replaceGauge(entitiesGaugeByTypeAndChunk, scanEntitiesByTypeAndChunk(server));
+        } else {
+            replaceGauge(entitiesGaugeByTypeAndChunk, Map.of());
+        }
         replaceGauge(chunksGaugeByWorld, scanChunks(server));
     }
 
@@ -298,9 +350,12 @@ public final class TelemetryState implements TelemetryStateStore {
         Map<String, Long> entitiesByTypeSnapshot = baselineEntityTypesMapOrNull != null
                 ? applyBaseline(entitiesGaugeByType, baselineEntityTypesMapOrNull)
                 : snapshotFromGauge(entitiesGaugeByType);
-        Map<ChunkEntityKey, Long> entitiesByTypeAndChunkSnapshot = baselineEntityTypesByChunkMapOrNull != null
-                ? applyBaseline(entitiesGaugeByTypeAndChunk, baselineEntityTypesByChunkMapOrNull)
-                : snapshotFromGauge(entitiesGaugeByTypeAndChunk);
+        Map<ChunkEntityKey, Long> entitiesByTypeAndChunkSnapshot = null;
+        if (entityTypeChunkMode != EntitiesByChunkMode.OFF) {
+            entitiesByTypeAndChunkSnapshot = baselineEntityTypesByChunkMapOrNull != null
+                    ? applyBaseline(entitiesGaugeByTypeAndChunk, baselineEntityTypesByChunkMapOrNull)
+                    : snapshotFromGauge(entitiesGaugeByTypeAndChunk);
+        }
         Map<String, Long> chunksSnapshot = baselineChunksMapOrNull != null
                 ? applyBaseline(chunksGaugeByWorld, baselineChunksMapOrNull)
                 : snapshotFromGauge(chunksGaugeByWorld);
@@ -360,6 +415,9 @@ public final class TelemetryState implements TelemetryStateStore {
      * @return entities per type and chunk
      */
     public Map<ChunkEntityKey, Long> scanEntitiesByTypeAndChunk(Server server) {
+        if (entityTypeChunkMode == EntitiesByChunkMode.OFF) {
+            return Map.of();
+        }
         Map<ChunkEntityKey, Long> baseline = new HashMap<>();
         for (World world : server.getWorlds()) {
             String worldName = world.getName();
@@ -367,9 +425,8 @@ public final class TelemetryState implements TelemetryStateStore {
                 continue;
             }
             for (Entity entity : world.getEntities()) {
-                var typeKeyObj = entity.getType().getKey();
-                String typeKey = typeKeyObj == null ? "" : typeKeyObj.toString();
-                if (typeKey.isBlank()) {
+                String typeKey = resolveChunkEntityTypeKey(entity);
+                if (typeKey == null || typeKey.isBlank()) {
                     continue;
                 }
                 var chunk = entity.getChunk();
@@ -378,6 +435,28 @@ public final class TelemetryState implements TelemetryStateStore {
             }
         }
         return baseline;
+    }
+
+    private String resolveChunkEntityTypeKey(Entity entity) {
+        EntitiesByChunkMode mode = entityTypeChunkMode;
+        if (mode == EntitiesByChunkMode.OFF) {
+            return null;
+        }
+        if (mode == EntitiesByChunkMode.HEAVY) {
+            var typeKeyObj = entity.getType().getKey();
+            String typeKey = typeKeyObj == null ? "" : typeKeyObj.toString();
+            return typeKey.isBlank() ? null : typeKey;
+        }
+        if (entity instanceof Player) {
+            return null;
+        }
+        if (entity instanceof Enemy) {
+            return "hostile";
+        }
+        if (entity instanceof LivingEntity) {
+            return "passive";
+        }
+        return null;
     }
 
     /**

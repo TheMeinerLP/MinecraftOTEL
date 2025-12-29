@@ -1,0 +1,418 @@
+{
+  "uid": "minecraftotel",
+  "title": "MinecraftOTEL + JVM",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["minecraft", "otel"],
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "Prometheus",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "world",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(minecraft_chunks_loaded, world)",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "refresh": 2
+      },
+      {
+        "name": "entity_type",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(minecraft_entities_loaded_by_type, entity_type)",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "refresh": 2
+      },
+      {
+        "name": "tps_window",
+        "type": "custom",
+        "query": "1m,5m,15m",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "1m",
+          "value": "1m"
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Players Online",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "targets": [
+        {
+          "expr": "sum(minecraft_players_online)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "values": false},
+        "orientation": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Entities per Chunk",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+      "targets": [
+        {
+          "expr": "minecraft_entities_per_chunk",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "values": false},
+        "orientation": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Unique Chunk Ratio",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+      "targets": [
+        {
+          "expr": "minecraft_chunks_loaded_per_player",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "values": false},
+        "orientation": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Chunks Loaded (Total)",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
+      "targets": [
+        {
+          "expr": "sum(minecraft_chunks_loaded)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "values": false},
+        "orientation": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "TPS",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "minecraft_server_tps{window=~\"$tps_window\"}",
+          "legendFormat": "{{window}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []}
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "MSPT Avg / P95",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "minecraft_server_mspt_avg",
+          "legendFormat": "avg",
+          "refId": "A"
+        },
+        {
+          "expr": "minecraft_server_mspt_p95",
+          "legendFormat": "p95",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Tick Duration p95 (Histogram)",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 10, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(minecraft_tick_duration_bucket[5m])))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []}
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Tick Duration Avg",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 10, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "rate(minecraft_tick_duration_sum[5m]) / rate(minecraft_tick_duration_count[5m])",
+          "legendFormat": "avg",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []}
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Chunks Loaded by World",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 16, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "minecraft_chunks_loaded{world=~\"$world\"}",
+          "legendFormat": "{{world}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []}
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Chunk Load/Unload/Generate Rate",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 16, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "rate(minecraft_chunks_load_total[5m])",
+          "legendFormat": "load",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(minecraft_chunks_unload_total[5m])",
+          "legendFormat": "unload",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(minecraft_chunks_generated_total[5m])",
+          "legendFormat": "generated",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops"}, "overrides": []}
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Entities Loaded by World",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 22, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "minecraft_entities_loaded{world=~\"$world\"}",
+          "legendFormat": "{{world}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []}
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Entities Loaded by Type",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 22, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "minecraft_entities_loaded_by_type{entity_type=~\"$entity_type\"}",
+          "legendFormat": "{{entity_type}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []}
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Entities Added/Removed Rate",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 28, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "rate(minecraft_entities_added_total[5m])",
+          "legendFormat": "added",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(minecraft_entities_removed_total[5m])",
+          "legendFormat": "removed",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops"}, "overrides": []}
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Entity Types by Chunk (Top 10)",
+      "description": "Requires entitiesByChunk.mode = light or heavy. High cardinality in heavy mode.",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 28, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "topk(10, minecraft_entities_loaded_by_type_chunk{world=~\"$world\", entity_type=~\"$entity_type\"})",
+          "legendFormat": "{{world}} {{chunk_x}},{{chunk_z}} {{entity_type}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []}
+    },
+    {
+      "id": 15,
+      "type": "row",
+      "title": "JVM",
+      "gridPos": {"x": 0, "y": 34, "w": 24, "h": 1}
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "JVM Heap Used",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 35, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "process_runtime_jvm_memory_used_bytes{area=\"heap\"}",
+          "legendFormat": "heap",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}, "overrides": []}
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "JVM Non-Heap Used",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 35, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "process_runtime_jvm_memory_used_bytes{area=\"non_heap\"}",
+          "legendFormat": "non-heap",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}, "overrides": []}
+    },
+    {
+      "id": 18,
+      "type": "timeseries",
+      "title": "JVM GC Pause Rate",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 41, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "rate(process_runtime_jvm_gc_duration_seconds_sum[5m])",
+          "legendFormat": "gc sec/s",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "s/s"}, "overrides": []}
+    },
+    {
+      "id": 19,
+      "type": "timeseries",
+      "title": "JVM Threads",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 41, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "process_runtime_jvm_threads_count",
+          "legendFormat": "threads",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []}
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "JVM CPU Utilization",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 47, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "process_runtime_jvm_cpu_utilization",
+          "legendFormat": "cpu",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}, "overrides": []}
+    }
+  ]
+}

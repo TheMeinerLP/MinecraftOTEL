@@ -5,6 +5,8 @@ otel:
     chunks: true
     tpsMspt: true
   preferSpark: true
+  entitiesByChunk:
+    mode: off
 sampling:
   intervalSeconds: 1
   baselineScanIntervalSeconds: 10

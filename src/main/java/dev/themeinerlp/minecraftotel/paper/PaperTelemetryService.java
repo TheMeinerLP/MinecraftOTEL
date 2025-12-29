@@ -67,6 +67,7 @@ public final class PaperTelemetryService implements TelemetryService {
             return;
         }
         running = true;
+        state.setEntityTypeChunkMode(config.entitiesByChunkMode);
         state.baselineInit(plugin.getServer());
 
         if (config.enableChunks) {

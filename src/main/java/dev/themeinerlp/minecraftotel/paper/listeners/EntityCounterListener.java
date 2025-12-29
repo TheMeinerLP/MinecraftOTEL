@@ -38,10 +38,9 @@ public final class EntityCounterListener implements Listener {
         String worldName = event.getEntity().getWorld().getName();
         var typeKeyObj = event.getEntity().getType().getKey();
         String typeKey = typeKeyObj == null ? "" : typeKeyObj.toString();
-        var chunk = event.getEntity().getChunk();
         state.incrementEntity(worldName);
         state.incrementEntityType(typeKey);
-        state.incrementEntityTypeInChunk(worldName, chunk.getX(), chunk.getZ(), typeKey);
+        state.incrementEntityTypeInChunk(event.getEntity());
         collector.recordLongCounter(
                 StandardMetrics.ENTITIES_ADDED_TOTAL,
                 1L,
@@ -60,10 +59,9 @@ public final class EntityCounterListener implements Listener {
         String worldName = event.getEntity().getWorld().getName();
         var typeKeyObj = event.getEntity().getType().getKey();
         String typeKey = typeKeyObj == null ? "" : typeKeyObj.toString();
-        var chunk = event.getEntity().getChunk();
         state.decrementEntity(worldName);
         state.decrementEntityType(typeKey);
-        state.decrementEntityTypeInChunk(worldName, chunk.getX(), chunk.getZ(), typeKey);
+        state.decrementEntityTypeInChunk(event.getEntity());
         collector.recordLongCounter(
                 StandardMetrics.ENTITIES_REMOVED_TOTAL,
                 1L,

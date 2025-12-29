@@ -11,6 +11,8 @@ public final class PluginConfig {
     public final boolean enableTick;
     /** Enables entity gauges and add/remove counters. */
     public final boolean enableEntities;
+    /** Mode for entity type per chunk tracking. */
+    public final EntitiesByChunkMode entitiesByChunkMode;
     /** Enables chunk gauges and load/unload counters. */
     public final boolean enableChunks;
     /** Enables TPS and MSPT sampling. */
@@ -25,6 +27,7 @@ public final class PluginConfig {
     private PluginConfig(
             boolean enableTick,
             boolean enableEntities,
+            EntitiesByChunkMode entitiesByChunkMode,
             boolean enableChunks,
             boolean enableTpsMspt,
             boolean preferSpark,
@@ -33,6 +36,7 @@ public final class PluginConfig {
     ) {
         this.enableTick = enableTick;
         this.enableEntities = enableEntities;
+        this.entitiesByChunkMode = entitiesByChunkMode;
         this.enableChunks = enableChunks;
         this.enableTpsMspt = enableTpsMspt;
         this.preferSpark = preferSpark;
@@ -50,6 +54,15 @@ public final class PluginConfig {
         FileConfiguration cfg = plugin.getConfig();
         boolean enableTick = cfg.getBoolean("otel.enable.tick", true);
         boolean enableEntities = cfg.getBoolean("otel.enable.entities", true);
+        EntitiesByChunkMode entitiesByChunkMode = EntitiesByChunkMode.fromString(
+                cfg.getString("otel.entitiesByChunk.mode", "")
+        );
+        if (entitiesByChunkMode == null) {
+            boolean enableEntitiesByChunk = cfg.getBoolean("otel.enable.entitiesByChunk", false);
+            entitiesByChunkMode = enableEntitiesByChunk
+                    ? EntitiesByChunkMode.HEAVY
+                    : EntitiesByChunkMode.OFF;
+        }
         boolean enableChunks = cfg.getBoolean("otel.enable.chunks", true);
         boolean enableTpsMspt = cfg.getBoolean("otel.enable.tpsMspt", true);
         boolean preferSpark = cfg.getBoolean("otel.preferSpark", true);
@@ -59,9 +72,13 @@ public final class PluginConfig {
                 5,
                 300
         );
+        if (!enableEntities) {
+            entitiesByChunkMode = EntitiesByChunkMode.OFF;
+        }
         return new PluginConfig(
                 enableTick,
                 enableEntities,
+                entitiesByChunkMode,
                 enableChunks,
                 enableTpsMspt,
                 preferSpark,

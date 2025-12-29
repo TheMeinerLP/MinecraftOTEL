@@ -33,24 +33,33 @@ metrics and relies on the OpenTelemetry Java Agent for exporting.
 ## Metrics
 
 ### Paper
-- `minecraft.players.online` (gauge)
-- `minecraft.entities.loaded` (gauge, attribute: `world`)
-- `minecraft.chunks.loaded` (gauge, attribute: `world`)
-- `minecraft.entities.added_total` (counter, attribute: `world`)
-- `minecraft.entities.removed_total` (counter, attribute: `world`)
-- `minecraft.chunks.load_total` (counter, attribute: `world`)
-- `minecraft.chunks.unload_total` (counter, attribute: `world`)
-- `minecraft.tick.duration` (histogram, ms)
-- `minecraft.server.tps` (gauge, attribute: `window` = `1m|5m|15m`)
-- `minecraft.server.mspt.avg` (gauge, ms)
-- `minecraft.server.mspt.p95` (gauge, ms)
+- `minecraft.players.online` (gauge) - online players.
+- `minecraft.entities.loaded` (gauge, `world`) - loaded entities per world.
+- `minecraft.entities.loaded_by_type` (gauge, `entity_type`) - loaded entities by type (all worlds).
+- `minecraft.entities.loaded_by_type_chunk` (gauge, `world`, `chunk_x`, `chunk_z`, `entity_type`) - optional, per-chunk entity types.
+  - `light`: `entity_type` is `hostile|passive`.
+  - `heavy`: `entity_type` is the exact entity type key.
+- `minecraft.entities.per_chunk` (gauge) - avg entities per loaded chunk (all worlds).
+- `minecraft.entities.added_total` (counter, `world`) - entities added to world.
+- `minecraft.entities.removed_total` (counter, `world`) - entities removed from world.
+- `minecraft.chunks.loaded` (gauge, `world`) - loaded chunks per world.
+- `minecraft.chunks.loaded_per_player` (gauge) - ratio of chunks visible to exactly one player vs total loaded chunks.
+- `minecraft.chunks.load_total` (counter, `world`) - chunk loads.
+- `minecraft.chunks.unload_total` (counter, `world`) - chunk unloads.
+- `minecraft.chunks.generated_total` (counter, `world`) - newly generated chunks.
+- `minecraft.tick.duration` (histogram, ms) - per-tick duration.
+- `minecraft.server.tps` (gauge, `window` = `1m|5m|15m`) - TPS per window.
+- `minecraft.server.mspt.avg` (gauge, ms) - avg MSPT.
+- `minecraft.server.mspt.p95` (gauge, ms) - p95 MSPT.
 
 ### Velocity
 - `minecraft.players.online` (gauge)
 - `minecraft.proxy.players.online` (gauge, attribute: `server`)
 - `minecraft.proxy.servers.registered` (gauge)
 
-No high-cardinality labels are used (no player UUID/name, no chunk coordinates).
+Prometheus names replace dots with underscores (example: `minecraft.players.online` -> `minecraft_players_online`).
+
+Chunk-level entity metrics are high-cardinality and disabled by default.
 
 ## Configuration
 
@@ -65,6 +74,8 @@ otel:
     chunks: true
     tpsMspt: true
   preferSpark: true
+  entitiesByChunk:
+    mode: off # off|light|heavy
 sampling:
   intervalSeconds: 1
   baselineScanIntervalSeconds: 10
@@ -122,6 +133,7 @@ Notes:
 - The OpenTelemetry Collector listens on `4317/4318` for OTLP and forwards traces to Tempo.
 - Prometheus scrapes metrics from the collector on `:8889`.
 - Logs are forwarded to Loki via the collector (`/loki/api/v1/push`).
+- The prebuilt dashboard is in `dashboards/grafana/minecraftotel.json` and is auto-provisioned by Docker Compose.
 
 ## API Usage (Paper + Velocity)
 MinecraftOTEL exposes a small API so other plugins can create meters or react to
