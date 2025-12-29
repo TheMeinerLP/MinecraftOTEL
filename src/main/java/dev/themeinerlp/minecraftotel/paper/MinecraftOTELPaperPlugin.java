@@ -22,10 +22,10 @@ public final class MinecraftOTELPaperPlugin extends JavaPlugin {
         reloadConfig();
         saveDefaultConfig();
         PluginConfig config = PluginConfig.load(this);
-        api = new PaperMinecraftOtelApi(getDescription().getVersion());
+        telemetryService = new PaperTelemetryService(this, config);
+        api = new PaperMinecraftOtelApi(getDescription().getVersion(), telemetryService);
         getServer().getServicesManager().register(MinecraftOtelApi.class, api, this, ServicePriority.Normal);
         MinecraftOtelApiProvider.register(api);
-        telemetryService = new PaperTelemetryService(this, config);
         telemetryService.start();
     }
 

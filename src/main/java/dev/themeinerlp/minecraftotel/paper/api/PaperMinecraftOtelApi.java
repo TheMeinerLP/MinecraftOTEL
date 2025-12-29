@@ -1,6 +1,7 @@
 package dev.themeinerlp.minecraftotel.paper.api;
 
 import dev.themeinerlp.minecraftotel.api.MinecraftOtelApi;
+import dev.themeinerlp.minecraftotel.api.TelemetryService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 
@@ -9,14 +10,17 @@ import io.opentelemetry.api.metrics.Meter;
  */
 public final class PaperMinecraftOtelApi implements MinecraftOtelApi {
     private final String version;
+    private final TelemetryService telemetryService;
 
     /**
      * Creates a Paper API implementation with a default version.
      *
      * @param version plugin version
+     * @param telemetryService telemetry service instance
      */
-    public PaperMinecraftOtelApi(String version) {
+    public PaperMinecraftOtelApi(String version, TelemetryService telemetryService) {
         this.version = normalizeVersion(version);
+        this.telemetryService = telemetryService;
     }
 
     @Override
@@ -27,6 +31,11 @@ public final class PaperMinecraftOtelApi implements MinecraftOtelApi {
     @Override
     public String getVersion() {
         return version;
+    }
+
+    @Override
+    public TelemetryService getTelemetryService() {
+        return telemetryService;
     }
 
     @Override

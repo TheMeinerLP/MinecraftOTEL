@@ -21,6 +21,13 @@ public interface MinecraftOtelApi {
     String getVersion();
 
     /**
+     * Returns the telemetry service used by this platform.
+     *
+     * @return telemetry service
+     */
+    TelemetryService getTelemetryService();
+
+    /**
      * Creates a meter with the given instrumentation name and the plugin version.
      *
      * @param instrumentationName instrumentation scope name

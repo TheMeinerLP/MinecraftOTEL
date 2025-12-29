@@ -36,14 +36,15 @@ public final class MinecraftOTELVelocityPlugin {
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
-        api = new VelocityMinecraftOtelApi(resolveVersion());
-        MinecraftOtelApiProvider.register(api);
+        String version = resolveVersion();
         telemetryService = new VelocityTelemetryService(
                 proxyServer,
                 logger,
                 dataDirectory,
-                api.getVersion()
+                version
         );
+        api = new VelocityMinecraftOtelApi(version, telemetryService);
+        MinecraftOtelApiProvider.register(api);
         telemetryService.start();
     }
 
