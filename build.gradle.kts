@@ -52,7 +52,7 @@ tasks {
     supportedMinecraftVersions.forEach { serverVersion ->
         register<RunServer>("run-$serverVersion") {
             minecraftVersion(serverVersion)
-            jvmArgs("-DPaper.IgnoreJavaVersion=true", "-Dcom.mojang.eula.agree=true")
+            jvmArgs("-DPaper.IgnoreJavaVersion=true", "-Dcom.mojang.eula.agree=true", "-javaagent:../opentelemetry-javaagent.jar")
             group = "run paper"
             runDirectory.set(file("run-$serverVersion"))
             pluginJars(rootProject.tasks.shadowJar.map { it.archiveFile }.get())

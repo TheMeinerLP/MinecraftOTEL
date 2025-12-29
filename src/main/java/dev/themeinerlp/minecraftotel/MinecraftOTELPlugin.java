@@ -10,43 +10,36 @@ import dev.themeinerlp.minecraftotel.sampler.SparkSampler;
 import dev.themeinerlp.minecraftotel.state.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.state.TelemetryState;
 import dev.themeinerlp.minecraftotel.tick.TickDurationRecorder;
-import java.util.Map;
-
+import dev.themeinerlp.minecraftotel.util.ThreadHelper;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.OpenTelemetry;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class MinecraftOTELPlugin extends JavaPlugin {
-    private boolean openTelemetryAvailable = true;
+import java.util.Map;
+
+public final class MinecraftOTELPlugin extends JavaPlugin implements ThreadHelper {
     private PluginConfig config;
     private TelemetryState state;
-    private MetricsRegistry metrics;
     private TickDurationRecorder tickDurationRecorder;
     private ServerSampler sampler;
     private long lastBaselineMillis;
 
     @Override
-    public void onLoad() {
-        openTelemetryAvailable = isOpenTelemetryAvailable();
+    public void onEnable() {
+        boolean openTelemetryAvailable = syncThreadForServiceLoader(this::isOpenTelemetryAvailable);
         if (!openTelemetryAvailable) {
             getLogger().severe("OpenTelemetry API not found on the classpath. Plugin will be disabled.");
-        }
-    }
-
-    @Override
-    public void onEnable() {
-        if (!openTelemetryAvailable) {
-            getServer().getPluginManager().disablePlugin(this);
-            getSLF4JLogger().warn("Disabling plugin due to missing OpenTelemetry API.");
             return;
         }
+        reloadConfig();
         saveDefaultConfig();
         this.config = PluginConfig.load(this);
 
         this.state = new TelemetryState();
         this.state.baselineInit(getServer());
 
-        this.metrics = new MetricsRegistry(this, state);
+        MetricsRegistry metrics = new MetricsRegistry(this, state);
 
         if (config.enableChunks) {
             getServer().getPluginManager().registerEvents(
@@ -161,7 +154,9 @@ public final class MinecraftOTELPlugin extends JavaPlugin {
 
     private boolean isOpenTelemetryAvailable() {
         try {
-            Object otel = GlobalOpenTelemetry.get();
+            OpenTelemetry otel = GlobalOpenTelemetry.get();
+            System.out.println("OpenTelemetry implementation: " + otel.getClass().getName());
+            System.out.println("OpenTelemetry implementation: " + otel != null);
             String cn = otel.getClass().getName();
             return cn.startsWith("io.opentelemetry.sdk.")
                     || cn.contains("OpenTelemetrySdk");
