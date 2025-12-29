@@ -102,9 +102,9 @@ Notes:
 
 ### Paper example
 ```java
-import dev.themeinerlp.minecraftotel.api.MinecraftOtelApi;
-import dev.themeinerlp.minecraftotel.api.MinecraftOtelApiProvider;
-import dev.themeinerlp.minecraftotel.api.StandardMetrics;
+import dev.themeinerlp.minecraftotel.api.core.MinecraftOtelApi;
+import dev.themeinerlp.minecraftotel.api.core.MinecraftOtelApiProvider;
+import dev.themeinerlp.minecraftotel.api.metrics.StandardMetrics;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.LongCounter;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -148,7 +148,7 @@ public final class MyPlugin extends JavaPlugin {
 
 ### Velocity example
 ```java
-import dev.themeinerlp.minecraftotel.api.MinecraftOtelApiProvider;
+import dev.themeinerlp.minecraftotel.api.core.MinecraftOtelApiProvider;
 import io.opentelemetry.api.metrics.Meter;
 
 public final class MyPlugin {
