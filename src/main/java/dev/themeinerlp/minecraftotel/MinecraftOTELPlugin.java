@@ -11,6 +11,8 @@ import dev.themeinerlp.minecraftotel.state.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.state.TelemetryState;
 import dev.themeinerlp.minecraftotel.tick.TickDurationRecorder;
 import java.util.Map;
+
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -158,31 +160,12 @@ public final class MinecraftOTELPlugin extends JavaPlugin {
     }
 
     private boolean isOpenTelemetryAvailable() {
-        return isClassAvailable("io.opentelemetry.api.GlobalOpenTelemetry");
-    }
-
-    private boolean isClassAvailable(String className) {
-        ClassLoader[] loaders = new ClassLoader[]{
-                getClassLoader(),
-                Thread.currentThread().getContextClassLoader(),
-                ClassLoader.getSystemClassLoader(),
-                ClassLoader.getPlatformClassLoader()
-        };
-        for (ClassLoader loader : loaders) {
-            if (loader == null) {
-                continue;
-            }
-            try {
-                Class.forName(className, false, loader);
-                return true;
-            } catch (ClassNotFoundException | LinkageError ignored) {
-                // Try next loader.
-            }
-        }
         try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException | LinkageError ignored) {
+            Object otel = GlobalOpenTelemetry.get();
+            String cn = otel.getClass().getName();
+            return cn.startsWith("io.opentelemetry.sdk.")
+                    || cn.contains("OpenTelemetrySdk");
+        } catch (Throwable t) {
             return false;
         }
     }
