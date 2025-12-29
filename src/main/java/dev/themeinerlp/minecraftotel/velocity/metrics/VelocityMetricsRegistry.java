@@ -7,8 +7,8 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import java.util.Map;
 import dev.themeinerlp.minecraftotel.velocity.config.VelocityPluginConfig;
-import dev.themeinerlp.minecraftotel.velocity.state.VelocityTelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.velocity.state.VelocityTelemetryState;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
 
 /**
  * Registers OpenTelemetry metrics for Velocity telemetry snapshots.
@@ -58,7 +58,7 @@ public final class VelocityMetricsRegistry {
             ObservableLongMeasurement measurement,
             VelocityTelemetryState state
     ) {
-        VelocityTelemetrySnapshot snapshot = state.getSnapshot();
+        TelemetrySnapshot snapshot = state.getSnapshot();
         measurement.record(snapshot.playersOnline());
     }
 
@@ -66,7 +66,7 @@ public final class VelocityMetricsRegistry {
             ObservableLongMeasurement measurement,
             VelocityTelemetryState state
     ) {
-        VelocityTelemetrySnapshot snapshot = state.getSnapshot();
+        TelemetrySnapshot snapshot = state.getSnapshot();
         for (Map.Entry<String, Long> entry : snapshot.playersByServer().entrySet()) {
             measurement.record(entry.getValue(), Attributes.of(SERVER_KEY, entry.getKey()));
         }
@@ -76,7 +76,7 @@ public final class VelocityMetricsRegistry {
             ObservableLongMeasurement measurement,
             VelocityTelemetryState state
     ) {
-        VelocityTelemetrySnapshot snapshot = state.getSnapshot();
+        TelemetrySnapshot snapshot = state.getSnapshot();
         measurement.record(snapshot.registeredServers());
     }
 }

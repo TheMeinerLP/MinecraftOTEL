@@ -3,7 +3,7 @@ package dev.themeinerlp.minecraftotel.velocity.sampler;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.themeinerlp.minecraftotel.velocity.config.VelocityPluginConfig;
-import dev.themeinerlp.minecraftotel.velocity.state.VelocityTelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ public final class VelocityProxySampler implements VelocitySampler {
     }
 
     @Override
-    public VelocityTelemetrySnapshot sample() {
+    public TelemetrySnapshot sample() {
         long playersOnline = proxyServer.getAllPlayers().size();
         Collection<RegisteredServer> servers = proxyServer.getAllServers();
         long registeredServers = includeServerCount ? servers.size() : 0L;
@@ -37,8 +37,13 @@ public final class VelocityProxySampler implements VelocitySampler {
                 ? mapPlayersByServer(servers)
                 : Map.of();
 
-        return new VelocityTelemetrySnapshot(
+        return new TelemetrySnapshot(
                 playersOnline,
+                Map.of(),
+                Map.of(),
+                null,
+                null,
+                null,
                 playersByServer,
                 registeredServers
         );

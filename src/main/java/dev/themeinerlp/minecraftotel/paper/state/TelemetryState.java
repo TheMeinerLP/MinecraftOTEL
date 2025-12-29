@@ -1,5 +1,6 @@
 package dev.themeinerlp.minecraftotel.paper.state;
 
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,9 +21,7 @@ public final class TelemetryState {
     private final AtomicBoolean entityEventsAvailable;
 
     public TelemetryState() {
-        this.snapshotRef = new AtomicReference<>(
-                new TelemetrySnapshot(0L, Map.of(), Map.of(), null, null, null)
-        );
+        this.snapshotRef = new AtomicReference<>(TelemetrySnapshot.empty());
         this.entitiesGaugeByWorld = new ConcurrentHashMap<>();
         this.chunksGaugeByWorld = new ConcurrentHashMap<>();
         this.entityEventsAvailable = new AtomicBoolean(false);
@@ -142,7 +141,9 @@ public final class TelemetryState {
                 chunksSnapshot,
                 tpsCopy,
                 msptAvgNullable,
-                msptP95Nullable
+                msptP95Nullable,
+                Map.of(),
+                0L
         );
     }
 

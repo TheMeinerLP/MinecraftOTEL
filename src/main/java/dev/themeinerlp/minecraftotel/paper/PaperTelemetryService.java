@@ -1,5 +1,8 @@
 package dev.themeinerlp.minecraftotel.paper;
 
+import dev.themeinerlp.minecraftotel.api.TelemetryListener;
+import dev.themeinerlp.minecraftotel.api.TelemetryService;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
 import dev.themeinerlp.minecraftotel.paper.listeners.ChunkCounterListener;
 import dev.themeinerlp.minecraftotel.paper.listeners.EntityCounterListener;
@@ -7,23 +10,26 @@ import dev.themeinerlp.minecraftotel.paper.metrics.MetricsRegistry;
 import dev.themeinerlp.minecraftotel.paper.sampler.PaperSampler;
 import dev.themeinerlp.minecraftotel.paper.sampler.ServerSampler;
 import dev.themeinerlp.minecraftotel.paper.sampler.SparkSampler;
-import dev.themeinerlp.minecraftotel.paper.state.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import dev.themeinerlp.minecraftotel.paper.tick.TickDurationRecorder;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Orchestrates sampling, listeners, and metrics for the Paper plugin.
  */
-public final class PaperTelemetryService {
+public final class PaperTelemetryService implements TelemetryService {
     private final JavaPlugin plugin;
     private final PluginConfig config;
     private final TelemetryState state;
+    private final List<TelemetryListener> listeners;
     private TickDurationRecorder tickDurationRecorder;
     private ServerSampler sampler;
     private long lastBaselineMillis;
+    private volatile boolean running;
 
     /**
      * Creates a telemetry service bound to a plugin and configuration.
@@ -35,12 +41,18 @@ public final class PaperTelemetryService {
         this.plugin = plugin;
         this.config = config;
         this.state = new TelemetryState();
+        this.listeners = new CopyOnWriteArrayList<>();
     }
 
     /**
      * Initializes listeners, metrics, and periodic sampling.
      */
+    @Override
     public void start() {
+        if (running) {
+            return;
+        }
+        running = true;
         state.baselineInit(plugin.getServer());
         MetricsRegistry metrics = new MetricsRegistry(plugin, state);
 
@@ -84,10 +96,40 @@ public final class PaperTelemetryService {
         plugin.getLogger().info("Paper tick events enabled: " + config.enableTick);
     }
 
+    @Override
+    public String getPlatform() {
+        return "paper";
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
+    }
+
+    @Override
+    public TelemetrySnapshot getSnapshot() {
+        return state.getSnapshot();
+    }
+
+    @Override
+    public void addListener(TelemetryListener listener) {
+        if (listener == null) {
+            return;
+        }
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(TelemetryListener listener) {
+        listeners.remove(listener);
+    }
+
     /**
      * Stops sampling and unregisters listeners.
      */
+    @Override
     public void stop() {
+        running = false;
         if (tickDurationRecorder != null) {
             tickDurationRecorder.stop();
         }
@@ -133,7 +175,7 @@ public final class PaperTelemetryService {
                             baselineEntities,
                             baselineChunks
                     );
-                    state.setSnapshot(snapshot);
+                    updateSnapshot(snapshot);
                 },
                 0L,
                 intervalTicks
@@ -153,5 +195,12 @@ public final class PaperTelemetryService {
     private boolean isSparkInstalled() {
         var plugin = this.plugin.getServer().getPluginManager().getPlugin("spark");
         return plugin != null && plugin.isEnabled();
+    }
+
+    private void updateSnapshot(TelemetrySnapshot snapshot) {
+        state.setSnapshot(snapshot);
+        for (TelemetryListener listener : listeners) {
+            listener.onSample(snapshot);
+        }
     }
 }

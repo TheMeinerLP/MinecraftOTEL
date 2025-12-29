@@ -1,7 +1,7 @@
 package dev.themeinerlp.minecraftotel.paper.metrics;
 
-import dev.themeinerlp.minecraftotel.paper.state.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;

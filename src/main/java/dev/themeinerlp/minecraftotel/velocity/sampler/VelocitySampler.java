@@ -1,6 +1,6 @@
 package dev.themeinerlp.minecraftotel.velocity.sampler;
 
-import dev.themeinerlp.minecraftotel.velocity.state.VelocityTelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
 
 /**
  * Builds telemetry snapshots from the current proxy state.
@@ -11,5 +11,5 @@ public interface VelocitySampler {
      *
      * @return immutable telemetry snapshot
      */
-    VelocityTelemetrySnapshot sample();
+    TelemetrySnapshot sample();
 }

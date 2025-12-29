@@ -2,6 +2,9 @@ package dev.themeinerlp.minecraftotel.velocity.service;
 
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
+import dev.themeinerlp.minecraftotel.api.TelemetryListener;
+import dev.themeinerlp.minecraftotel.api.TelemetryService;
+import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.velocity.config.VelocityPluginConfig;
 import dev.themeinerlp.minecraftotel.velocity.metrics.VelocityMetricsRegistry;
 import dev.themeinerlp.minecraftotel.velocity.sampler.VelocityProxySampler;
@@ -9,20 +12,24 @@ import dev.themeinerlp.minecraftotel.velocity.sampler.VelocitySampler;
 import dev.themeinerlp.minecraftotel.velocity.state.VelocityTelemetryState;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 
 /**
  * Coordinates config loading, metrics registration, and sampling for Velocity.
  */
-public final class VelocityTelemetryService {
+public final class VelocityTelemetryService implements TelemetryService {
     private final ProxyServer proxyServer;
     private final Logger logger;
     private final Path dataDirectory;
     private final String version;
+    private final List<TelemetryListener> listeners;
     private VelocityPluginConfig config;
     private VelocityTelemetryState state;
     private VelocitySampler sampler;
     private ScheduledTask samplingTask;
+    private volatile boolean running;
 
     /**
      * Creates a telemetry coordinator for a Velocity proxy instance.
@@ -42,18 +49,24 @@ public final class VelocityTelemetryService {
         this.logger = logger;
         this.dataDirectory = dataDirectory;
         this.version = version;
+        this.listeners = new CopyOnWriteArrayList<>();
+        this.state = new VelocityTelemetryState();
     }
 
     /**
      * Initializes metrics and starts the periodic sampling task.
      */
+    @Override
     public void start() {
+        if (running) {
+            return;
+        }
+        running = true;
         this.config = VelocityPluginConfig.load(
                 dataDirectory,
                 logger,
                 getClass().getClassLoader()
         );
-        this.state = new VelocityTelemetryState();
         this.sampler = new VelocityProxySampler(proxyServer, config);
         new VelocityMetricsRegistry(version, state, config);
 
@@ -65,10 +78,40 @@ public final class VelocityTelemetryService {
         logger.info("Velocity server count enabled: {}", config.enableServerCount);
     }
 
+    @Override
+    public String getPlatform() {
+        return "velocity";
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
+    }
+
+    @Override
+    public TelemetrySnapshot getSnapshot() {
+        return state.getSnapshot();
+    }
+
+    @Override
+    public void addListener(TelemetryListener listener) {
+        if (listener == null) {
+            return;
+        }
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(TelemetryListener listener) {
+        listeners.remove(listener);
+    }
+
     /**
      * Stops the periodic sampling task.
      */
+    @Override
     public void stop() {
+        running = false;
         if (samplingTask != null) {
             samplingTask.cancel();
             samplingTask = null;
@@ -83,6 +126,10 @@ public final class VelocityTelemetryService {
     }
 
     private void sampleOnce() {
-        state.setSnapshot(sampler.sample());
+        TelemetrySnapshot snapshot = sampler.sample();
+        state.setSnapshot(snapshot);
+        for (TelemetryListener listener : listeners) {
+            listener.onSample(snapshot);
+        }
     }
 }
