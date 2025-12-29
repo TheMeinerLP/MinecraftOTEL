@@ -36,7 +36,7 @@ val supportedMinecraftVersions = listOf(
 )
 
 group = "dev.themeinerlp"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0"
 
 dependencies {
     compileOnly(libs.paper)
