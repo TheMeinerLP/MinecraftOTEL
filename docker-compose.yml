@@ -33,7 +33,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.49.1
-    command: ["--config.file=/etc/prometheus/prometheus.yml", "--web.enable-remote-write-receiver"]
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--web.enable-remote-write-receiver", "--web.listen-address=0.0.0.0:9090"]
     volumes:
       - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
@@ -42,7 +42,7 @@ services:
       - alloy
 
   grafana:
-    image: grafana/grafana:10.3.1
+    image: grafana/grafana:latest
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin

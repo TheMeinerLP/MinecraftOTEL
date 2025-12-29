@@ -121,8 +121,7 @@ Open Grafana at http://localhost:3000 (anonymous access is enabled).
 Notes:
 - Alloy listens on `4317/4318` for OTLP and forwards traces to Tempo.
 - Metrics are written to Prometheus via remote-write (`/api/v1/write`).
-- Loki is included for log testing. If you export logs via OTLP, add a logs
-  pipeline in `docker/alloy.alloy`.
+- Logs are forwarded to Loki via Alloy (`/loki/api/v1/push`).
 
 ## API Usage (Paper + Velocity)
 MinecraftOTEL exposes a small API so other plugins can create meters or react to
