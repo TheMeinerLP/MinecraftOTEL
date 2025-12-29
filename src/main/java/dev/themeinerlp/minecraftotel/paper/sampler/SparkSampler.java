@@ -1,4 +1,4 @@
-package dev.themeinerlp.minecraftotel.sampler;
+package dev.themeinerlp.minecraftotel.paper.sampler;
 
 import me.lucko.spark.api.Spark;
 import me.lucko.spark.api.SparkProvider;

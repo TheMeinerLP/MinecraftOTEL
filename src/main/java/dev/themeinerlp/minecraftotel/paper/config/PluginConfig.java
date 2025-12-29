@@ -1,4 +1,4 @@
-package dev.themeinerlp.minecraftotel.config;
+package dev.themeinerlp.minecraftotel.paper.config;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;

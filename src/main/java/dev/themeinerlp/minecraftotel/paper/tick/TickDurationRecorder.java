@@ -1,4 +1,4 @@
-package dev.themeinerlp.minecraftotel.tick;
+package dev.themeinerlp.minecraftotel.paper.tick;
 
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
@@ -25,10 +25,6 @@ public final class TickDurationRecorder implements Listener {
 
     public void stop() {
         HandlerList.unregisterAll(this);
-    }
-
-    public boolean isPaperTickEventsAvailable() {
-        return true;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

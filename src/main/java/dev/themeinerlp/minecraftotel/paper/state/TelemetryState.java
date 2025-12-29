@@ -1,4 +1,4 @@
-package dev.themeinerlp.minecraftotel.state;
+package dev.themeinerlp.minecraftotel.paper.state;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ public final class TelemetryState {
     private final AtomicReference<TelemetrySnapshot> snapshotRef;
     private final ConcurrentHashMap<String, LongAdder> entitiesGaugeByWorld;
     private final ConcurrentHashMap<String, LongAdder> chunksGaugeByWorld;
-    private final AtomicBoolean paperEntityEventsAvailable;
+    private final AtomicBoolean entityEventsAvailable;
 
     public TelemetryState() {
         this.snapshotRef = new AtomicReference<>(
@@ -22,7 +22,7 @@ public final class TelemetryState {
         );
         this.entitiesGaugeByWorld = new ConcurrentHashMap<>();
         this.chunksGaugeByWorld = new ConcurrentHashMap<>();
-        this.paperEntityEventsAvailable = new AtomicBoolean(false);
+        this.entityEventsAvailable = new AtomicBoolean(false);
     }
 
     public TelemetrySnapshot getSnapshot() {
@@ -33,12 +33,12 @@ public final class TelemetryState {
         snapshotRef.set(snapshot);
     }
 
-    public boolean isPaperEntityEventsAvailable() {
-        return paperEntityEventsAvailable.get();
+    public boolean isEntityEventsAvailable() {
+        return entityEventsAvailable.get();
     }
 
-    public void setPaperEntityEventsAvailable(boolean available) {
-        paperEntityEventsAvailable.set(available);
+    public void setEntityEventsAvailable(boolean available) {
+        entityEventsAvailable.set(available);
     }
 
     public void incrementEntity(String worldName) {

@@ -1,4 +1,4 @@
-package dev.themeinerlp.minecraftotel.util;
+package dev.themeinerlp.minecraftotel.paper.util;
 
 import java.util.Arrays;
 

@@ -1,7 +1,7 @@
-package dev.themeinerlp.minecraftotel.listeners;
+package dev.themeinerlp.minecraftotel.paper.listeners;
 
-import dev.themeinerlp.minecraftotel.metrics.MetricsRegistry;
-import dev.themeinerlp.minecraftotel.state.TelemetryState;
+import dev.themeinerlp.minecraftotel.paper.metrics.MetricsRegistry;
+import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;

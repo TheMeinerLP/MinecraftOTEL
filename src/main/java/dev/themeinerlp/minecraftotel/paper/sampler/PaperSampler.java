@@ -1,6 +1,6 @@
-package dev.themeinerlp.minecraftotel.sampler;
+package dev.themeinerlp.minecraftotel.paper.sampler;
 
-import dev.themeinerlp.minecraftotel.util.Percentiles;
+import dev.themeinerlp.minecraftotel.paper.util.Percentiles;
 import org.bukkit.Server;
 
 public final class PaperSampler implements ServerSampler {

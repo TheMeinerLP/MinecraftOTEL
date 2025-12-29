@@ -74,7 +74,7 @@ tasks {
 }
 
 paper {
-    main = "dev.themeinerlp.minecraftotel.MinecraftOTELPlugin"
+    main = "dev.themeinerlp.minecraftotel.paper.MinecraftOTELPaperPlugin"
     apiVersion = "1.19"
     authors = listOf("TheMeinerLP")
     foliaSupported = true

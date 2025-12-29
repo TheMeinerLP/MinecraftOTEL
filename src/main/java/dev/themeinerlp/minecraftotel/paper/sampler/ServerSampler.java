@@ -1,4 +1,4 @@
-package dev.themeinerlp.minecraftotel.sampler;
+package dev.themeinerlp.minecraftotel.paper.sampler;
 
 import org.bukkit.Server;
 

@@ -1,4 +1,4 @@
-package dev.themeinerlp.minecraftotel.state;
+package dev.themeinerlp.minecraftotel.paper.state;
 
 import java.util.Map;
 
