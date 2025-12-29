@@ -2,7 +2,9 @@ package dev.themeinerlp.minecraftotel.paper.listeners;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
-import dev.themeinerlp.minecraftotel.paper.metrics.MetricsRegistry;
+import dev.themeinerlp.minecraftotel.api.StandardMetrics;
+import dev.themeinerlp.minecraftotel.api.TelemetryCollector;
+import io.opentelemetry.api.common.Attributes;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,17 +15,17 @@ import org.bukkit.event.Listener;
  */
 public final class EntityCounterListener implements Listener {
     private final TelemetryState state;
-    private final MetricsRegistry metrics;
+    private final TelemetryCollector collector;
 
     /**
      * Creates an entity counter listener.
      *
      * @param state telemetry state
-     * @param metrics metrics registry
+     * @param collector telemetry collector
      */
-    public EntityCounterListener(TelemetryState state, MetricsRegistry metrics) {
+    public EntityCounterListener(TelemetryState state, TelemetryCollector collector) {
         this.state = state;
-        this.metrics = metrics;
+        this.collector = collector;
     }
 
     /**
@@ -35,7 +37,12 @@ public final class EntityCounterListener implements Listener {
     public void onEntityAdd(EntityAddToWorldEvent event) {
         String worldName = event.getEntity().getWorld().getName();
         state.incrementEntity(worldName);
-        metrics.getEntitiesAddedCounter().add(1L, MetricsRegistry.worldAttributes(worldName));
+        collector.recordLongCounter(
+                StandardMetrics.ENTITIES_ADDED_TOTAL,
+                1L,
+                StandardMetrics.UNIT_COUNT,
+                Attributes.of(StandardMetrics.WORLD_KEY, worldName)
+        );
     }
 
     /**
@@ -47,6 +54,11 @@ public final class EntityCounterListener implements Listener {
     public void onEntityRemove(EntityRemoveFromWorldEvent event) {
         String worldName = event.getEntity().getWorld().getName();
         state.decrementEntity(worldName);
-        metrics.getEntitiesRemovedCounter().add(1L, MetricsRegistry.worldAttributes(worldName));
+        collector.recordLongCounter(
+                StandardMetrics.ENTITIES_REMOVED_TOTAL,
+                1L,
+                StandardMetrics.UNIT_COUNT,
+                Attributes.of(StandardMetrics.WORLD_KEY, worldName)
+        );
     }
 }

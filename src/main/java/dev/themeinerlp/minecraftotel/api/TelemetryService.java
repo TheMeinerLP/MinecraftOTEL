@@ -26,6 +26,20 @@ public interface TelemetryService {
     TelemetrySnapshot getSnapshot();
 
     /**
+     * Registers an additional sampler to run each sampling interval.
+     *
+     * @param sampler sampler to add
+     */
+    void addSampler(TelemetrySampler sampler);
+
+    /**
+     * Removes a previously registered sampler.
+     *
+     * @param sampler sampler to remove
+     */
+    void removeSampler(TelemetrySampler sampler);
+
+    /**
      * Adds a listener for snapshot updates.
      *
      * @param listener listener to add

@@ -1,17 +1,22 @@
 package dev.themeinerlp.minecraftotel.paper;
 
+import dev.themeinerlp.minecraftotel.api.MeterTelemetryCollector;
+import dev.themeinerlp.minecraftotel.api.SnapshotTelemetrySampler;
+import dev.themeinerlp.minecraftotel.api.TelemetryCollector;
 import dev.themeinerlp.minecraftotel.api.TelemetryListener;
+import dev.themeinerlp.minecraftotel.api.TelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.TelemetryService;
 import dev.themeinerlp.minecraftotel.api.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
 import dev.themeinerlp.minecraftotel.paper.listeners.ChunkCounterListener;
 import dev.themeinerlp.minecraftotel.paper.listeners.EntityCounterListener;
-import dev.themeinerlp.minecraftotel.paper.metrics.MetricsRegistry;
 import dev.themeinerlp.minecraftotel.paper.sampler.PaperSampler;
 import dev.themeinerlp.minecraftotel.paper.sampler.ServerSampler;
 import dev.themeinerlp.minecraftotel.paper.sampler.SparkSampler;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import dev.themeinerlp.minecraftotel.paper.tick.TickDurationRecorder;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.metrics.Meter;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -25,9 +30,11 @@ public final class PaperTelemetryService implements TelemetryService {
     private final JavaPlugin plugin;
     private final PluginConfig config;
     private final TelemetryState state;
+    private final TelemetryCollector collector;
+    private final List<TelemetrySampler> samplers;
     private final List<TelemetryListener> listeners;
     private TickDurationRecorder tickDurationRecorder;
-    private ServerSampler sampler;
+    private ServerSampler serverSampler;
     private long lastBaselineMillis;
     private volatile boolean running;
 
@@ -41,6 +48,13 @@ public final class PaperTelemetryService implements TelemetryService {
         this.plugin = plugin;
         this.config = config;
         this.state = new TelemetryState();
+        Meter meter = GlobalOpenTelemetry.get()
+                .meterBuilder("minecraft-otel-paper")
+                .setInstrumentationVersion(plugin.getDescription().getVersion())
+                .build();
+        this.collector = new MeterTelemetryCollector(meter);
+        this.samplers = new CopyOnWriteArrayList<>();
+        this.samplers.add(new SnapshotTelemetrySampler());
         this.listeners = new CopyOnWriteArrayList<>();
     }
 
@@ -54,11 +68,10 @@ public final class PaperTelemetryService implements TelemetryService {
         }
         running = true;
         state.baselineInit(plugin.getServer());
-        MetricsRegistry metrics = new MetricsRegistry(plugin, state);
 
         if (config.enableChunks) {
             plugin.getServer().getPluginManager().registerEvents(
-                    new ChunkCounterListener(state, metrics),
+                    new ChunkCounterListener(state, collector),
                     plugin
             );
         }
@@ -66,7 +79,7 @@ public final class PaperTelemetryService implements TelemetryService {
         if (config.enableEntities) {
             state.setEntityEventsAvailable(true);
             plugin.getServer().getPluginManager().registerEvents(
-                    new EntityCounterListener(state, metrics),
+                    new EntityCounterListener(state, collector),
                     plugin
             );
         } else {
@@ -74,7 +87,7 @@ public final class PaperTelemetryService implements TelemetryService {
         }
 
         if (config.enableTick) {
-            tickDurationRecorder = new TickDurationRecorder(plugin, metrics.getTickDurationHistogram());
+            tickDurationRecorder = new TickDurationRecorder(plugin, collector);
             tickDurationRecorder.start();
         }
 
@@ -84,9 +97,9 @@ public final class PaperTelemetryService implements TelemetryService {
             sparkSampler = new SparkSampler(paperSampler);
         }
         if (sparkSampler != null && sparkSampler.isAvailable()) {
-            sampler = sparkSampler;
+            serverSampler = sparkSampler;
         } else {
-            sampler = paperSampler;
+            serverSampler = paperSampler;
         }
 
         startSamplingTask();
@@ -109,6 +122,19 @@ public final class PaperTelemetryService implements TelemetryService {
     @Override
     public TelemetrySnapshot getSnapshot() {
         return state.getSnapshot();
+    }
+
+    @Override
+    public void addSampler(TelemetrySampler sampler) {
+        if (sampler == null) {
+            return;
+        }
+        samplers.add(sampler);
+    }
+
+    @Override
+    public void removeSampler(TelemetrySampler sampler) {
+        samplers.remove(sampler);
     }
 
     @Override
@@ -143,7 +169,7 @@ public final class PaperTelemetryService implements TelemetryService {
                 () -> {
                     long playersOnline = plugin.getServer().getOnlinePlayers().size();
                     ServerSampler.SampleResult sampleResult = config.enableTpsMspt
-                            ? sampler.sample(plugin.getServer())
+                            ? serverSampler.sample(plugin.getServer())
                             : ServerSampler.SampleResult.empty();
 
                     long now = System.currentTimeMillis();
@@ -183,7 +209,7 @@ public final class PaperTelemetryService implements TelemetryService {
     }
 
     private String samplerName(ServerSampler paperSampler, ServerSampler sparkSampler) {
-        if (sparkSampler != null && sampler == sparkSampler) {
+        if (sparkSampler != null && serverSampler == sparkSampler) {
             return "spark";
         }
         if (paperSampler.isAvailable()) {
@@ -201,6 +227,13 @@ public final class PaperTelemetryService implements TelemetryService {
         state.setSnapshot(snapshot);
         for (TelemetryListener listener : listeners) {
             listener.onSample(snapshot);
+        }
+        runSamplers(snapshot);
+    }
+
+    private void runSamplers(TelemetrySnapshot snapshot) {
+        for (TelemetrySampler sampler : samplers) {
+            sampler.sample(snapshot, collector);
         }
     }
 }

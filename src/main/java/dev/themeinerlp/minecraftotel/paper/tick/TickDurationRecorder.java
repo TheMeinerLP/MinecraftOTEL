@@ -2,7 +2,8 @@ package dev.themeinerlp.minecraftotel.paper.tick;
 
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
-import io.opentelemetry.api.metrics.DoubleHistogram;
+import dev.themeinerlp.minecraftotel.api.StandardMetrics;
+import dev.themeinerlp.minecraftotel.api.TelemetryCollector;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -14,18 +15,18 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public final class TickDurationRecorder implements Listener {
     private final JavaPlugin plugin;
-    private final DoubleHistogram tickDurationHistogram;
+    private final TelemetryCollector collector;
     private long tickStartNanos;
 
     /**
      * Creates a tick duration recorder.
      *
      * @param plugin plugin instance
-     * @param tickDurationHistogram histogram to record tick durations
+     * @param collector telemetry collector
      */
-    public TickDurationRecorder(JavaPlugin plugin, DoubleHistogram tickDurationHistogram) {
+    public TickDurationRecorder(JavaPlugin plugin, TelemetryCollector collector) {
         this.plugin = plugin;
-        this.tickDurationHistogram = tickDurationHistogram;
+        this.collector = collector;
     }
 
     /**
@@ -63,7 +64,12 @@ public final class TickDurationRecorder implements Listener {
             return;
         }
         long durationNanos = System.nanoTime() - tickStartNanos;
-        tickDurationHistogram.record(durationNanos / 1_000_000d);
+        collector.recordDoubleHistogram(
+                StandardMetrics.TICK_DURATION,
+                durationNanos / 1_000_000d,
+                StandardMetrics.UNIT_MILLIS,
+                null
+        );
         tickStartNanos = 0L;
     }
 }

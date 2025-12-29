@@ -1,6 +1,8 @@
 package dev.themeinerlp.minecraftotel.paper.listeners;
 
-import dev.themeinerlp.minecraftotel.paper.metrics.MetricsRegistry;
+import dev.themeinerlp.minecraftotel.api.StandardMetrics;
+import dev.themeinerlp.minecraftotel.api.TelemetryCollector;
+import io.opentelemetry.api.common.Attributes;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,17 +15,17 @@ import org.bukkit.event.world.ChunkUnloadEvent;
  */
 public final class ChunkCounterListener implements Listener {
     private final TelemetryState state;
-    private final MetricsRegistry metrics;
+    private final TelemetryCollector collector;
 
     /**
      * Creates a chunk counter listener.
      *
      * @param state telemetry state
-     * @param metrics metrics registry
+     * @param collector telemetry collector
      */
-    public ChunkCounterListener(TelemetryState state, MetricsRegistry metrics) {
+    public ChunkCounterListener(TelemetryState state, TelemetryCollector collector) {
         this.state = state;
-        this.metrics = metrics;
+        this.collector = collector;
     }
 
     /**
@@ -35,7 +37,12 @@ public final class ChunkCounterListener implements Listener {
     public void onChunkLoad(ChunkLoadEvent event) {
         String worldName = event.getWorld().getName();
         state.incrementChunk(worldName);
-        metrics.getChunksLoadCounter().add(1L, MetricsRegistry.worldAttributes(worldName));
+        collector.recordLongCounter(
+                StandardMetrics.CHUNKS_LOAD_TOTAL,
+                1L,
+                StandardMetrics.UNIT_COUNT,
+                Attributes.of(StandardMetrics.WORLD_KEY, worldName)
+        );
     }
 
     /**
@@ -47,6 +54,11 @@ public final class ChunkCounterListener implements Listener {
     public void onChunkUnload(ChunkUnloadEvent event) {
         String worldName = event.getWorld().getName();
         state.decrementChunk(worldName);
-        metrics.getChunksUnloadCounter().add(1L, MetricsRegistry.worldAttributes(worldName));
+        collector.recordLongCounter(
+                StandardMetrics.CHUNKS_UNLOAD_TOTAL,
+                1L,
+                StandardMetrics.UNIT_COUNT,
+                Attributes.of(StandardMetrics.WORLD_KEY, worldName)
+        );
     }
 }
