@@ -29,10 +29,16 @@ public final class MinecraftOTELPaperPlugin extends JavaPlugin {
         telemetryService.start();
 
         // Example:
-        // api.getTelemetryService().addSampler((snapshot, collector) ->
-        //     collector.recordLongGauge("myplugin.players", snapshot.playersOnline()));
-        // api.getTelemetryService().addSnapshotSampler(builder ->
-        //     builder.setPlayersOnline(123));
+        // api.getTelemetryService().addSampler((snapshot, collector) -> {
+        //     if (snapshot instanceof dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot paperSnapshot) {
+        //         collector.recordLongGauge("myplugin.players", paperSnapshot.playersOnline());
+        //     }
+        // });
+        // api.getTelemetryService().addSnapshotSampler(builder -> {
+        //     if (builder instanceof dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshotBuilder paperBuilder) {
+        //         paperBuilder.setPlayersOnline(123);
+        //     }
+        // });
     }
 
     /**

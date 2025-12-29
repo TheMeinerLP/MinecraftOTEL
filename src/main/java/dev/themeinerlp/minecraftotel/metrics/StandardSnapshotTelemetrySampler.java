@@ -1,24 +1,35 @@
-package dev.themeinerlp.minecraftotel.api.sampler;
+package dev.themeinerlp.minecraftotel.metrics;
 
 import dev.themeinerlp.minecraftotel.api.collector.TelemetryCollector;
 import dev.themeinerlp.minecraftotel.api.metrics.StandardMetrics;
+import dev.themeinerlp.minecraftotel.api.sampler.TelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshot;
 import io.opentelemetry.api.common.Attributes;
 import java.util.Map;
 
 /**
- * Emits standard MinecraftOTEL metrics from a TelemetrySnapshot.
- *
- * @since 1.1.0
- * @version 1.1.0
+ * Emits standard MinecraftOTEL metrics from platform snapshots.
  */
-public final class SnapshotTelemetrySampler implements TelemetrySampler {
+public final class StandardSnapshotTelemetrySampler implements TelemetrySampler {
     @Override
     public void sample(TelemetrySnapshot snapshot, TelemetryCollector collector) {
         if (snapshot == null || collector == null) {
             return;
         }
 
+        if (snapshot instanceof PaperTelemetrySnapshot paperSnapshot) {
+            emitPaperSnapshot(paperSnapshot, collector);
+            return;
+        }
+
+        if (snapshot instanceof VelocityTelemetrySnapshot velocitySnapshot) {
+            emitVelocitySnapshot(velocitySnapshot, collector);
+        }
+    }
+
+    private void emitPaperSnapshot(PaperTelemetrySnapshot snapshot, TelemetryCollector collector) {
         collector.recordLongGauge(
                 StandardMetrics.PLAYERS_ONLINE,
                 snapshot.playersOnline(),
@@ -78,16 +89,23 @@ public final class SnapshotTelemetrySampler implements TelemetrySampler {
                     Attributes.empty()
             );
         }
+    }
 
-        if (!snapshot.playersByServer().isEmpty()) {
-            for (Map.Entry<String, Long> entry : snapshot.playersByServer().entrySet()) {
-                collector.recordLongGauge(
-                        StandardMetrics.PROXY_PLAYERS_ONLINE,
-                        entry.getValue(),
-                        StandardMetrics.UNIT_COUNT,
-                        Attributes.of(StandardMetrics.SERVER_KEY, entry.getKey())
-                );
-            }
+    private void emitVelocitySnapshot(VelocityTelemetrySnapshot snapshot, TelemetryCollector collector) {
+        collector.recordLongGauge(
+                StandardMetrics.PLAYERS_ONLINE,
+                snapshot.playersOnline(),
+                StandardMetrics.UNIT_COUNT,
+                Attributes.empty()
+        );
+
+        for (Map.Entry<String, Long> entry : snapshot.playersByServer().entrySet()) {
+            collector.recordLongGauge(
+                    StandardMetrics.PROXY_PLAYERS_ONLINE,
+                    entry.getValue(),
+                    StandardMetrics.UNIT_COUNT,
+                    Attributes.of(StandardMetrics.SERVER_KEY, entry.getKey())
+            );
         }
 
         if (!snapshot.playersByServer().isEmpty() || snapshot.registeredServers() > 0L) {

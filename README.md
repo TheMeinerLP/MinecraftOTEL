@@ -131,8 +131,9 @@ MinecraftOTEL exposes a small API so other plugins can create meters or react to
 telemetry snapshots. The API is identical on Paper and Velocity.
 
 Notes:
-- Paper-only fields: `entitiesLoadedByWorld`, `chunksLoadedByWorld`, `tpsNullable`, `msptAvgNullable`, `msptP95Nullable`.
-- Velocity-only fields: `playersByServer`, `registeredServers`.
+- `TelemetrySnapshot` is a marker interface; cast to the platform snapshot type to access fields.
+- Paper snapshot fields (`PaperTelemetrySnapshot`): `entitiesLoadedByWorld`, `chunksLoadedByWorld`, `tpsNullable`, `msptAvgNullable`, `msptP95Nullable`.
+- Velocity snapshot fields (`VelocityTelemetrySnapshot`): `playersByServer`, `registeredServers`.
 - Custom sampling: register a sampler to emit gauges/counters/histograms via the shared collector.
 
 ### Paper example
@@ -140,6 +141,8 @@ Notes:
 import dev.themeinerlp.minecraftotel.api.core.MinecraftOtelApi;
 import dev.themeinerlp.minecraftotel.api.core.MinecraftOtelApiProvider;
 import dev.themeinerlp.minecraftotel.api.metrics.StandardMetrics;
+import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshotBuilder;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.LongCounter;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -161,21 +164,27 @@ public final class MyPlugin extends JavaPlugin {
         counter.add(1);
 
         api.getTelemetryService().addListener(snapshot -> {
-            long players = snapshot.playersOnline();
-            // Use snapshot fields to enrich your own metrics or logs.
+            if (snapshot instanceof PaperTelemetrySnapshot paperSnapshot) {
+                long players = paperSnapshot.playersOnline();
+                // Use snapshot fields to enrich your own metrics or logs.
+            }
         });
 
         api.getTelemetryService().addSampler((snapshot, collector) -> {
-            collector.recordLongGauge(
-                "myplugin.players.last",
-                snapshot.playersOnline(),
-                StandardMetrics.UNIT_COUNT,
-                io.opentelemetry.api.common.Attributes.empty()
-            );
+            if (snapshot instanceof PaperTelemetrySnapshot paperSnapshot) {
+                collector.recordLongGauge(
+                    "myplugin.players.last",
+                    paperSnapshot.playersOnline(),
+                    StandardMetrics.UNIT_COUNT,
+                    io.opentelemetry.api.common.Attributes.empty()
+                );
+            }
         });
 
         api.getTelemetryService().addSnapshotSampler(builder -> {
-            builder.setPlayersOnline(123);
+            if (builder instanceof PaperTelemetrySnapshotBuilder paperBuilder) {
+                paperBuilder.setPlayersOnline(123);
+            }
         });
     }
 }
@@ -184,6 +193,8 @@ public final class MyPlugin extends JavaPlugin {
 ### Velocity example
 ```java
 import dev.themeinerlp.minecraftotel.api.core.MinecraftOtelApiProvider;
+import dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshotBuilder;
 import io.opentelemetry.api.metrics.Meter;
 
 public final class MyPlugin {
@@ -191,14 +202,20 @@ public final class MyPlugin {
         MinecraftOtelApiProvider.get().ifPresent(api -> {
             Meter meter = api.getMeter("my-proxy-plugin");
             api.getTelemetryService().addListener(snapshot -> {
-                long players = snapshot.playersOnline();
-                long backends = snapshot.registeredServers();
+                if (snapshot instanceof VelocityTelemetrySnapshot velocitySnapshot) {
+                    long players = velocitySnapshot.playersOnline();
+                    long backends = velocitySnapshot.registeredServers();
+                }
             });
             api.getTelemetryService().addSampler((snapshot, collector) -> {
-                collector.recordLongGauge("myproxy.players", snapshot.playersOnline());
+                if (snapshot instanceof VelocityTelemetrySnapshot velocitySnapshot) {
+                    collector.recordLongGauge("myproxy.players", velocitySnapshot.playersOnline());
+                }
             });
             api.getTelemetryService().addSnapshotSampler(builder -> {
-                builder.setRegisteredServers(5);
+                if (builder instanceof VelocityTelemetrySnapshotBuilder velocityBuilder) {
+                    velocityBuilder.setRegisteredServers(5);
+                }
             });
         });
     }

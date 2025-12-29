@@ -3,6 +3,7 @@ package dev.themeinerlp.minecraftotel.paper.sampler;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotBuilder;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
+import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshotBuilder;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import dev.themeinerlp.minecraftotel.paper.util.Percentiles;
 import java.util.Arrays;
@@ -28,6 +29,9 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
 
     @Override
     public void sample(TelemetrySnapshotBuilder builder) {
+        if (!(builder instanceof PaperTelemetrySnapshotBuilder paperBuilder)) {
+            return;
+        }
         long playersOnline = server.getOnlinePlayers().size();
         SampleResult sampleResult = config.enableTpsMspt
                 ? tpsSampler.sample(server)
@@ -63,9 +67,11 @@ public final class PaperSnapshotSampler implements TelemetrySnapshotSampler {
                 baselineChunks
         );
 
-        builder.setPlayersOnline(snapshot.playersOnline());
-        snapshot.entitiesLoadedByWorld().ifPresent(builder::setEntitiesLoadedByWorld);
-        builder
+        paperBuilder.setPlayersOnline(snapshot.playersOnline());
+        if (config.enableEntities) {
+            snapshot.entitiesLoadedByWorld().ifPresent(paperBuilder::setEntitiesLoadedByWorld);
+        }
+        paperBuilder
                 .setChunksLoadedByWorld(snapshot.chunksLoadedByWorld())
                 .setTps(snapshot.tpsNullable())
                 .setMsptAvg(snapshot.msptAvgNullable())

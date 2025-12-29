@@ -48,10 +48,16 @@ public final class MinecraftOTELVelocityPlugin {
         telemetryService.start();
 
         // Example:
-        // api.getTelemetryService().addSampler((snapshot, collector) ->
-        //     collector.recordLongGauge("myproxy.players", snapshot.playersOnline()));
-        // api.getTelemetryService().addSnapshotSampler(builder ->
-        //     builder.setRegisteredServers(5));
+        // api.getTelemetryService().addSampler((snapshot, collector) -> {
+        //     if (snapshot instanceof dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshot velocitySnapshot) {
+        //         collector.recordLongGauge("myproxy.players", velocitySnapshot.playersOnline());
+        //     }
+        // });
+        // api.getTelemetryService().addSnapshotSampler(builder -> {
+        //     if (builder instanceof dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshotBuilder velocityBuilder) {
+        //         velocityBuilder.setRegisteredServers(5);
+        //     }
+        // });
     }
 
     @Subscribe

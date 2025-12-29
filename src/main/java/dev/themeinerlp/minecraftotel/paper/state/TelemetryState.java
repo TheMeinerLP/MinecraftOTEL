@@ -2,6 +2,7 @@ package dev.themeinerlp.minecraftotel.paper.state;
 
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.api.state.TelemetryStateStore;
+import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,7 @@ public final class TelemetryState implements TelemetryStateStore {
     private volatile boolean entityEventsAvailable;
 
     public TelemetryState() {
-        this.snapshot = TelemetrySnapshot.empty();
+        this.snapshot = PaperTelemetrySnapshot.empty();
         this.entitiesGaugeByWorld = new HashMap<>();
         this.chunksGaugeByWorld = new HashMap<>();
         this.entityEventsAvailable = false;
@@ -119,7 +120,7 @@ public final class TelemetryState implements TelemetryStateStore {
      * @param baselineChunksMapOrNull baseline chunks map or null to reuse gauge
      * @return rebuilt snapshot
      */
-    public TelemetrySnapshot rebuildSnapshot(
+    public PaperTelemetrySnapshot rebuildSnapshot(
             long playersOnline,
             double[] tpsNullable,
             Double msptAvgNullable,
@@ -134,16 +135,13 @@ public final class TelemetryState implements TelemetryStateStore {
                 ? applyBaseline(chunksGaugeByWorld, baselineChunksMapOrNull)
                 : snapshotFromGauge(chunksGaugeByWorld);
         double[] tpsCopy = tpsNullable == null ? null : Arrays.copyOf(tpsNullable, tpsNullable.length);
-        return TelemetrySnapshot.of(
+        return new PaperTelemetrySnapshot(
                 playersOnline,
                 entitiesSnapshot,
                 chunksSnapshot,
                 tpsCopy,
                 msptAvgNullable,
-                msptP95Nullable,
-                Map.of(),
-                0L,
-                null
+                msptP95Nullable
         );
     }
 

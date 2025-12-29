@@ -4,17 +4,18 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import dev.themeinerlp.minecraftotel.api.collector.MeterTelemetryCollector;
 import dev.themeinerlp.minecraftotel.api.collector.TelemetryCollector;
-import dev.themeinerlp.minecraftotel.api.sampler.SnapshotTelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.sampler.TelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.service.TelemetryListener;
 import dev.themeinerlp.minecraftotel.api.service.TelemetryService;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
-import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotBuilder;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.api.state.TelemetrySnapshotStore;
 import dev.themeinerlp.minecraftotel.api.state.TelemetryStateStore;
+import dev.themeinerlp.minecraftotel.metrics.StandardSnapshotTelemetrySampler;
 import dev.themeinerlp.minecraftotel.velocity.config.VelocityPluginConfig;
 import dev.themeinerlp.minecraftotel.velocity.sampler.VelocitySnapshotSampler;
+import dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshot;
+import dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshotBuilder;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 import java.nio.file.Path;
@@ -66,9 +67,9 @@ public final class VelocityTelemetryService implements TelemetryService {
         this.collector = new MeterTelemetryCollector(meter);
         this.snapshotSamplers = new CopyOnWriteArrayList<>();
         this.samplers = new CopyOnWriteArrayList<>();
-        this.samplers.add(new SnapshotTelemetrySampler());
+        this.samplers.add(new StandardSnapshotTelemetrySampler());
         this.listeners = new CopyOnWriteArrayList<>();
-        this.state = new TelemetrySnapshotStore();
+        this.state = new TelemetrySnapshotStore(VelocityTelemetrySnapshot.empty());
     }
 
     /**
@@ -170,7 +171,7 @@ public final class VelocityTelemetryService implements TelemetryService {
     }
 
     private void sampleOnce() {
-        TelemetrySnapshotBuilder builder = new TelemetrySnapshotBuilder();
+        VelocityTelemetrySnapshotBuilder builder = new VelocityTelemetrySnapshotBuilder();
         for (TelemetrySnapshotSampler sampler : snapshotSamplers) {
             sampler.sample(builder);
         }

@@ -2,17 +2,17 @@ package dev.themeinerlp.minecraftotel.paper;
 
 import dev.themeinerlp.minecraftotel.api.collector.MeterTelemetryCollector;
 import dev.themeinerlp.minecraftotel.api.collector.TelemetryCollector;
-import dev.themeinerlp.minecraftotel.api.sampler.SnapshotTelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.sampler.TelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.service.TelemetryListener;
 import dev.themeinerlp.minecraftotel.api.service.TelemetryService;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
-import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotBuilder;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
+import dev.themeinerlp.minecraftotel.metrics.StandardSnapshotTelemetrySampler;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
 import dev.themeinerlp.minecraftotel.paper.listeners.ChunkCounterListener;
 import dev.themeinerlp.minecraftotel.paper.listeners.EntityCounterListener;
 import dev.themeinerlp.minecraftotel.paper.sampler.PaperSnapshotSampler;
+import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshotBuilder;
 import dev.themeinerlp.minecraftotel.paper.state.TelemetryState;
 import dev.themeinerlp.minecraftotel.paper.tick.TickDurationRecorder;
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -54,7 +54,7 @@ public final class PaperTelemetryService implements TelemetryService {
         this.collector = new MeterTelemetryCollector(meter);
         this.snapshotSamplers = new CopyOnWriteArrayList<>();
         this.samplers = new CopyOnWriteArrayList<>();
-        this.samplers.add(new SnapshotTelemetrySampler());
+        this.samplers.add(new StandardSnapshotTelemetrySampler());
         this.listeners = new CopyOnWriteArrayList<>();
     }
 
@@ -172,7 +172,7 @@ public final class PaperTelemetryService implements TelemetryService {
         Bukkit.getScheduler().runTaskTimer(
                 plugin,
                 () -> {
-                    TelemetrySnapshotBuilder builder = new TelemetrySnapshotBuilder();
+                    PaperTelemetrySnapshotBuilder builder = new PaperTelemetrySnapshotBuilder();
                     for (TelemetrySnapshotSampler sampler : snapshotSamplers) {
                         sampler.sample(builder);
                     }
