@@ -138,6 +138,10 @@ public final class MyPlugin extends JavaPlugin {
                 io.opentelemetry.api.common.Attributes.empty()
             );
         });
+
+        api.getTelemetryService().addSnapshotSampler(builder -> {
+            builder.setPlayersOnline(123);
+        });
     }
 }
 ```
@@ -157,6 +161,9 @@ public final class MyPlugin {
             });
             api.getTelemetryService().addSampler((snapshot, collector) -> {
                 collector.recordLongGauge("myproxy.players", snapshot.playersOnline());
+            });
+            api.getTelemetryService().addSnapshotSampler(builder -> {
+                builder.setRegisteredServers(5);
             });
         });
     }

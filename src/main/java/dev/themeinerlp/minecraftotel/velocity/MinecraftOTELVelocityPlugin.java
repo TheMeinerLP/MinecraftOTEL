@@ -46,6 +46,12 @@ public final class MinecraftOTELVelocityPlugin {
         api = new VelocityMinecraftOtelApi(version, telemetryService);
         MinecraftOtelApiProvider.register(api);
         telemetryService.start();
+
+        // Example:
+        // api.getTelemetryService().addSampler((snapshot, collector) ->
+        //     collector.recordLongGauge("myproxy.players", snapshot.playersOnline()));
+        // api.getTelemetryService().addSnapshotSampler(builder ->
+        //     builder.setRegisteredServers(5));
     }
 
     @Subscribe

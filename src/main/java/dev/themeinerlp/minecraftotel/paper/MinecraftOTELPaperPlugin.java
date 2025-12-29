@@ -27,6 +27,12 @@ public final class MinecraftOTELPaperPlugin extends JavaPlugin {
         getServer().getServicesManager().register(MinecraftOtelApi.class, api, this, ServicePriority.Normal);
         MinecraftOtelApiProvider.register(api);
         telemetryService.start();
+
+        // Example:
+        // api.getTelemetryService().addSampler((snapshot, collector) ->
+        //     collector.recordLongGauge("myplugin.players", snapshot.playersOnline()));
+        // api.getTelemetryService().addSnapshotSampler(builder ->
+        //     builder.setPlayersOnline(123));
     }
 
     /**
