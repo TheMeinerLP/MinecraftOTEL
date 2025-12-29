@@ -90,19 +90,21 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
             );
         }
 
+        long totalChunksLoaded = 0L;
+        for (long value : snapshot.chunksLoadedByWorld().values()) {
+            totalChunksLoaded += value;
+        }
+        final long totalChunksLoadedFinal = totalChunksLoaded;
+
         snapshot.entitiesLoadedByWorld().ifPresent(entitiesByWorld -> {
             long totalEntitiesLoaded = 0L;
             for (long value : entitiesByWorld.values()) {
                 totalEntitiesLoaded += value;
             }
-            long totalChunksLoaded = 0L;
-            for (long value : snapshot.chunksLoadedByWorld().values()) {
-                totalChunksLoaded += value;
-            }
-            if (totalChunksLoaded > 0L) {
+            if (totalChunksLoadedFinal > 0L) {
                 collector.recordDoubleGauge(
                         StandardMetrics.ENTITIES_PER_CHUNK,
-                        totalEntitiesLoaded / (double) totalChunksLoaded,
+                        totalEntitiesLoaded / (double) totalChunksLoadedFinal,
                         StandardMetrics.UNIT_COUNT,
                         Attributes.empty()
                 );
@@ -110,8 +112,8 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
         });
 
         long exclusiveChunksLoaded = snapshot.exclusiveChunksLoaded();
-        double chunksPerPlayer = snapshot.playersOnline() > 0L
-                ? exclusiveChunksLoaded / (double) snapshot.playersOnline()
+        double chunksPerPlayer = totalChunksLoadedFinal > 0L
+                ? exclusiveChunksLoaded / (double) totalChunksLoadedFinal
                 : 0.0d;
         collector.recordDoubleGauge(
                 StandardMetrics.CHUNKS_LOADED_PER_PLAYER,
