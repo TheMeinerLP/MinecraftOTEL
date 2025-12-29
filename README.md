@@ -91,6 +91,64 @@ Example (adjust exporter settings):
 -javaagent:/path/to/opentelemetry-javaagent.jar
 ```
 
+## API Usage (Paper + Velocity)
+MinecraftOTEL exposes a small API so other plugins can create meters or react to
+telemetry snapshots. The API is identical on Paper and Velocity.
+
+Notes:
+- Paper-only fields: `entitiesLoadedByWorld`, `chunksLoadedByWorld`, `tpsNullable`, `msptAvgNullable`, `msptP95Nullable`.
+- Velocity-only fields: `playersByServer`, `registeredServers`.
+
+### Paper example
+```java
+import dev.themeinerlp.minecraftotel.api.MinecraftOtelApi;
+import dev.themeinerlp.minecraftotel.api.MinecraftOtelApiProvider;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.LongCounter;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public final class MyPlugin extends JavaPlugin {
+    @Override
+    public void onEnable() {
+        MinecraftOtelApi api = getServer().getServicesManager().load(MinecraftOtelApi.class);
+        if (api == null) {
+            api = MinecraftOtelApiProvider.get().orElse(null);
+        }
+        if (api == null) {
+            getLogger().warning("MinecraftOTEL API not available.");
+            return;
+        }
+
+        Meter meter = api.getMeter("my-plugin");
+        LongCounter counter = meter.counterBuilder("myplugin.events_total").build();
+        counter.add(1);
+
+        api.getTelemetryService().addListener(snapshot -> {
+            long players = snapshot.playersOnline();
+            // Use snapshot fields to enrich your own metrics or logs.
+        });
+    }
+}
+```
+
+### Velocity example
+```java
+import dev.themeinerlp.minecraftotel.api.MinecraftOtelApiProvider;
+import io.opentelemetry.api.metrics.Meter;
+
+public final class MyPlugin {
+    public void onProxyInitialize() {
+        MinecraftOtelApiProvider.get().ifPresent(api -> {
+            Meter meter = api.getMeter("my-proxy-plugin");
+            api.getTelemetryService().addListener(snapshot -> {
+                long players = snapshot.playersOnline();
+                long backends = snapshot.registeredServers();
+            });
+        });
+    }
+}
+```
+
 ## Build
 ```
 ./gradlew build
