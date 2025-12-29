@@ -35,6 +35,7 @@ public final class MinecraftOTELPlugin extends JavaPlugin {
     public void onEnable() {
         if (!openTelemetryAvailable) {
             getServer().getPluginManager().disablePlugin(this);
+            getSLF4JLogger().warn("Disabling plugin due to missing OpenTelemetry API.");
             return;
         }
         saveDefaultConfig();
@@ -157,10 +158,31 @@ public final class MinecraftOTELPlugin extends JavaPlugin {
     }
 
     private boolean isOpenTelemetryAvailable() {
+        return isClassAvailable("io.opentelemetry.api.GlobalOpenTelemetry");
+    }
+
+    private boolean isClassAvailable(String className) {
+        ClassLoader[] loaders = new ClassLoader[]{
+                getClassLoader(),
+                Thread.currentThread().getContextClassLoader(),
+                ClassLoader.getSystemClassLoader(),
+                ClassLoader.getPlatformClassLoader()
+        };
+        for (ClassLoader loader : loaders) {
+            if (loader == null) {
+                continue;
+            }
+            try {
+                Class.forName(className, false, loader);
+                return true;
+            } catch (ClassNotFoundException | LinkageError ignored) {
+                // Try next loader.
+            }
+        }
         try {
-            Class.forName("io.opentelemetry.api.GlobalOpenTelemetry", false, getClassLoader());
+            Class.forName(className);
             return true;
-        } catch (ClassNotFoundException ignored) {
+        } catch (ClassNotFoundException | LinkageError ignored) {
             return false;
         }
     }
