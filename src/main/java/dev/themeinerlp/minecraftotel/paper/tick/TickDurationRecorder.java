@@ -1,7 +1,6 @@
 package dev.themeinerlp.minecraftotel.paper.tick;
 
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
-import com.destroystokyo.paper.event.server.ServerTickStartEvent;
 import dev.themeinerlp.minecraftotel.api.collector.TelemetryCollector;
 import dev.themeinerlp.minecraftotel.api.metrics.StandardMetrics;
 import org.bukkit.event.EventHandler;
@@ -16,7 +15,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class TickDurationRecorder implements Listener {
     private final JavaPlugin plugin;
     private final TelemetryCollector collector;
-    private long tickStartNanos;
 
     /**
      * Creates a tick duration recorder.
@@ -44,32 +42,18 @@ public final class TickDurationRecorder implements Listener {
     }
 
     /**
-     * Captures the tick start time in nanoseconds.
-     *
-     * @param event tick start event
-     */
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onTickStart(ServerTickStartEvent event) {
-        tickStartNanos = System.nanoTime();
-    }
-
-    /**
      * Records the elapsed tick time to the histogram.
      *
      * @param event tick end event
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onTickEnd(ServerTickEndEvent event) {
-        if (tickStartNanos == 0L) {
-            return;
-        }
-        long durationNanos = System.nanoTime() - tickStartNanos;
+        double durationMillis = event.getTickDuration();
         collector.recordDoubleHistogram(
                 StandardMetrics.TICK_DURATION,
-                durationNanos / 1_000_000d,
+                durationMillis,
                 StandardMetrics.UNIT_MILLIS,
                 null
         );
-        tickStartNanos = 0L;
     }
 }
