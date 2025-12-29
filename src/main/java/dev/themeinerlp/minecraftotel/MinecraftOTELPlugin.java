@@ -70,8 +70,11 @@ public final class MinecraftOTELPlugin extends JavaPlugin {
         }
 
         ServerSampler paperSampler = new PaperSampler();
-        ServerSampler sparkSampler = new SparkSampler(getServer(), paperSampler);
-        if (config.preferSpark && sparkSampler.isAvailable()) {
+        ServerSampler sparkSampler = null;
+        if (config.preferSpark && isSparkInstalled()) {
+            sparkSampler = new SparkSampler(paperSampler);
+        }
+        if (sparkSampler != null && sparkSampler.isAvailable()) {
             sampler = sparkSampler;
         } else {
             sampler = paperSampler;
@@ -139,13 +142,18 @@ public final class MinecraftOTELPlugin extends JavaPlugin {
     }
 
     private String samplerName(ServerSampler paperSampler, ServerSampler sparkSampler) {
-        if (sampler == sparkSampler) {
+        if (sparkSampler != null && sampler == sparkSampler) {
             return "spark";
         }
         if (paperSampler.isAvailable()) {
             return "paper";
         }
         return "none";
+    }
+
+    private boolean isSparkInstalled() {
+        var plugin = getServer().getPluginManager().getPlugin("spark");
+        return plugin != null && plugin.isEnabled();
     }
 
     private boolean isOpenTelemetryAvailable() {

@@ -41,6 +41,7 @@ version = "1.0.0-SNAPSHOT"
 dependencies {
     compileOnly(rootProject.libs.paper)
     compileOnly("io.opentelemetry:opentelemetry-api:1.45.0")
+    compileOnly("me.lucko:spark-api:0.1-SNAPSHOT")
 }
 
 tasks {
