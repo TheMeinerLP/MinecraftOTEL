@@ -1,0 +1,19 @@
+package dev.themeinerlp.minecraftotel.sampler;
+
+import dev.themeinerlp.minecraftotel.util.Percentiles;
+import org.bukkit.Server;
+
+public final class PaperSampler implements ServerSampler {
+    @Override
+    public boolean isAvailable() {
+        return true;
+    }
+
+    @Override
+    public SampleResult sample(Server server) {
+        double[] tps = server.getTPS();
+        double msptAvg = server.getAverageTickTime();
+        Double msptP95 = Percentiles.p95Ms(server.getTickTimes());
+        return new SampleResult(tps, msptAvg, msptP95);
+    }
+}

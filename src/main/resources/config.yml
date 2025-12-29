@@ -1,0 +1,10 @@
+otel:
+  enable:
+    tick: true
+    entities: true
+    chunks: true
+    tpsMspt: true
+  preferSpark: true
+sampling:
+  intervalSeconds: 1
+  baselineScanIntervalSeconds: 10
