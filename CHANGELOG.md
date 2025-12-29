@@ -1,3 +1,11 @@
+## 1.2.0 (2025-12-29)
+
+* Merge branch 'main' of https://github.com/TheMeinerLP/MinecraftOTEL ([8781b76](https://github.com/TheMeinerLP/MinecraftOTEL/commit/8781b76))
+* refactor: remove OpenTelemetry availability check from plugin initialization ([fd6c92f](https://github.com/TheMeinerLP/MinecraftOTEL/commit/fd6c92f))
+* feat: add thread context switching for OpenTelemetry initialization ([e5c0ba0](https://github.com/TheMeinerLP/MinecraftOTEL/commit/e5c0ba0))
+* feat: simplify OpenTelemetry API detection logic ([a2c1c21](https://github.com/TheMeinerLP/MinecraftOTEL/commit/a2c1c21))
+* feat(build): update OpenTelemetry dependency configuration and enhance plugin metadata ([078e203](https://github.com/TheMeinerLP/MinecraftOTEL/commit/078e203))
+
 ## 1.1.0 (2025-12-29)
 
 * Merge branch 'main' of https://github.com/TheMeinerLP/MinecraftOTEL ([f7494ec](https://github.com/TheMeinerLP/MinecraftOTEL/commit/f7494ec))
