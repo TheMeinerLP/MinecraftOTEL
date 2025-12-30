@@ -1,3 +1,9 @@
+## 1.5.0 (2025-12-30)
+
+* Merge branch 'main' of https://github.com/TheMeinerLP/MinecraftOTEL ([34e3b95](https://github.com/TheMeinerLP/MinecraftOTEL/commit/34e3b95))
+* feat(cloudnet): replace CloudNet injection with JSON-based config parsing ([014fc97](https://github.com/TheMeinerLP/MinecraftOTEL/commit/014fc97))
+* chore(dependencies): update CloudNet version to RC15, adjust bundle configuration, and add new repos ([56fd4ae](https://github.com/TheMeinerLP/MinecraftOTEL/commit/56fd4ae))
+
 ## 1.4.0 (2025-12-30)
 
 * feat: add GitHub Actions workflows for pull requests and releases ([08131d8](https://github.com/TheMeinerLP/MinecraftOTEL/commit/08131d8))
