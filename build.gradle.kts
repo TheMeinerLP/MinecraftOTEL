@@ -40,6 +40,7 @@ dependencies {
     compileOnly(libs.velocity.api)
     annotationProcessor(libs.velocity.api)
     implementation(libs.opentelemetry.api)
+    implementation(libs.opentelemetry.sdk.spi)
     compileOnly(libs.spark.api)
     implementation(platform(libs.cloudnet.bom))
     compileOnly(libs.bundles.cloudnet)
