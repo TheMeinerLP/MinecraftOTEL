@@ -41,6 +41,8 @@ dependencies {
     annotationProcessor(libs.velocity.api)
     implementation(libs.opentelemetry.api)
     compileOnly(libs.spark.api)
+    implementation(platform(libs.cloudnet.bom))
+    compileOnly(libs.bundles.cloudnet)
 }
 
 tasks {
