@@ -41,9 +41,8 @@ dependencies {
     annotationProcessor(libs.velocity.api)
     implementation(libs.opentelemetry.api)
     implementation(libs.opentelemetry.sdk.spi)
+    implementation(libs.gson)
     compileOnly(libs.spark.api)
-    implementation(platform(libs.cloudnet.bom))
-    implementation(libs.bundles.cloudnet)
 }
 
 tasks {
@@ -64,6 +63,7 @@ tasks {
     shadowJar {
         archiveClassifier.set("")
         relocate("org.bstats", "net.onelitefeather.antiredstoneclockremastered.org.bstats")
+        relocate("com.google.gson", "dev.themeinerlp.minecraftotel.libs.gson")
         dependsOn(jar)
     }
 
