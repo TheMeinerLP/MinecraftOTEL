@@ -1,3 +1,9 @@
+## 1.4.0 (2025-12-30)
+
+* feat: add GitHub Actions workflows for pull requests and releases ([08131d8](https://github.com/TheMeinerLP/MinecraftOTEL/commit/08131d8))
+* feat: integrate CloudNet-specific OpenTelemetry resource provider ([78f6737](https://github.com/TheMeinerLP/MinecraftOTEL/commit/78f6737))
+* feat(dependencies): add CloudNet libraries and bundle configuration ([699e053](https://github.com/TheMeinerLP/MinecraftOTEL/commit/699e053))
+
 ## 1.3.0 (2025-12-29)
 
 * feat: add entity chunk modes and grafana dashboard ([1a2b784](https://github.com/TheMeinerLP/MinecraftOTEL/commit/1a2b784))
