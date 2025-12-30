@@ -43,7 +43,7 @@ dependencies {
     implementation(libs.opentelemetry.sdk.spi)
     compileOnly(libs.spark.api)
     implementation(platform(libs.cloudnet.bom))
-    compileOnly(libs.bundles.cloudnet)
+    implementation(libs.bundles.cloudnet)
 }
 
 tasks {
