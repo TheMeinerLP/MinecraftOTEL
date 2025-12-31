@@ -7,7 +7,7 @@ import dev.themeinerlp.minecraftotel.api.service.TelemetryListener;
 import dev.themeinerlp.minecraftotel.api.service.TelemetryService;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
-import dev.themeinerlp.minecraftotel.metrics.StandardSnapshotTelemetrySampler;
+import dev.themeinerlp.minecraftotel.paper.metrics.PaperStandardSnapshotTelemetrySampler;
 import dev.themeinerlp.minecraftotel.paper.config.PluginConfig;
 import dev.themeinerlp.minecraftotel.paper.listeners.ChunkCounterListener;
 import dev.themeinerlp.minecraftotel.paper.listeners.EntityCounterListener;
@@ -54,7 +54,7 @@ public final class PaperTelemetryService implements TelemetryService {
         this.collector = new MeterTelemetryCollector(meter);
         this.snapshotSamplers = new CopyOnWriteArrayList<>();
         this.samplers = new CopyOnWriteArrayList<>();
-        this.samplers.add(new StandardSnapshotTelemetrySampler());
+        this.samplers.add(new PaperStandardSnapshotTelemetrySampler());
         this.listeners = new CopyOnWriteArrayList<>();
     }
 

@@ -1,4 +1,4 @@
-package dev.themeinerlp.minecraftotel.metrics;
+package dev.themeinerlp.minecraftotel.paper.metrics;
 
 import dev.themeinerlp.minecraftotel.api.collector.TelemetryCollector;
 import dev.themeinerlp.minecraftotel.api.metrics.StandardMetrics;
@@ -6,39 +6,31 @@ import dev.themeinerlp.minecraftotel.api.sampler.TelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.paper.snapshot.PaperTelemetrySnapshot.ChunkEntityKey;
-import dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshot;
 import io.opentelemetry.api.common.Attributes;
 import java.util.Map;
 
 /**
- * Emits standard MinecraftOTEL metrics from platform snapshots.
+ * Emits standard MinecraftOTEL metrics for Paper snapshots.
  */
-public final class StandardSnapshotTelemetrySampler implements TelemetrySampler {
+public final class PaperStandardSnapshotTelemetrySampler implements TelemetrySampler {
     @Override
     public void sample(TelemetrySnapshot snapshot, TelemetryCollector collector) {
         if (snapshot == null || collector == null) {
             return;
         }
 
-        if (snapshot instanceof PaperTelemetrySnapshot paperSnapshot) {
-            emitPaperSnapshot(paperSnapshot, collector);
+        if (!(snapshot instanceof PaperTelemetrySnapshot paperSnapshot)) {
             return;
         }
 
-        if (snapshot instanceof VelocityTelemetrySnapshot velocitySnapshot) {
-            emitVelocitySnapshot(velocitySnapshot, collector);
-        }
-    }
-
-    private void emitPaperSnapshot(PaperTelemetrySnapshot snapshot, TelemetryCollector collector) {
         collector.recordLongGauge(
                 StandardMetrics.PLAYERS_ONLINE,
-                snapshot.playersOnline(),
+                paperSnapshot.playersOnline(),
                 StandardMetrics.UNIT_COUNT,
                 Attributes.empty()
         );
 
-        snapshot.entitiesLoadedByWorld().ifPresent(entitiesByWorld -> {
+        paperSnapshot.entitiesLoadedByWorld().ifPresent(entitiesByWorld -> {
             for (Map.Entry<String, Long> entry : entitiesByWorld.entrySet()) {
                 collector.recordLongGauge(
                         StandardMetrics.ENTITIES_LOADED,
@@ -49,7 +41,7 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
             }
         });
 
-        snapshot.entitiesLoadedByType().ifPresent(entitiesByType -> {
+        paperSnapshot.entitiesLoadedByType().ifPresent(entitiesByType -> {
             for (Map.Entry<String, Long> entry : entitiesByType.entrySet()) {
                 collector.recordLongGauge(
                         StandardMetrics.ENTITIES_LOADED_BY_TYPE,
@@ -60,7 +52,7 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
             }
         });
 
-        snapshot.entitiesLoadedByTypeAndChunk().ifPresent(entitiesByTypeAndChunk -> {
+        paperSnapshot.entitiesLoadedByTypeAndChunk().ifPresent(entitiesByTypeAndChunk -> {
             for (Map.Entry<ChunkEntityKey, Long> entry : entitiesByTypeAndChunk.entrySet()) {
                 var key = entry.getKey();
                 collector.recordLongGauge(
@@ -81,7 +73,7 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
             }
         });
 
-        for (Map.Entry<String, Long> entry : snapshot.chunksLoadedByWorld().entrySet()) {
+        for (Map.Entry<String, Long> entry : paperSnapshot.chunksLoadedByWorld().entrySet()) {
             collector.recordLongGauge(
                     StandardMetrics.CHUNKS_LOADED,
                     entry.getValue(),
@@ -91,12 +83,12 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
         }
 
         long totalChunksLoaded = 0L;
-        for (long value : snapshot.chunksLoadedByWorld().values()) {
+        for (long value : paperSnapshot.chunksLoadedByWorld().values()) {
             totalChunksLoaded += value;
         }
         final long totalChunksLoadedFinal = totalChunksLoaded;
 
-        snapshot.entitiesLoadedByWorld().ifPresent(entitiesByWorld -> {
+        paperSnapshot.entitiesLoadedByWorld().ifPresent(entitiesByWorld -> {
             long totalEntitiesLoaded = 0L;
             for (long value : entitiesByWorld.values()) {
                 totalEntitiesLoaded += value;
@@ -111,7 +103,7 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
             }
         });
 
-        long exclusiveChunksLoaded = snapshot.exclusiveChunksLoaded();
+        long exclusiveChunksLoaded = paperSnapshot.exclusiveChunksLoaded();
         double chunksPerPlayer = totalChunksLoadedFinal > 0L
                 ? exclusiveChunksLoaded / (double) totalChunksLoadedFinal
                 : 0.0d;
@@ -122,7 +114,7 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
                 Attributes.empty()
         );
 
-        double[] tps = snapshot.tpsNullable();
+        double[] tps = paperSnapshot.tpsNullable();
         if (tps != null) {
             int limit = Math.min(tps.length, StandardMetrics.TPS_WINDOWS.length);
             for (int i = 0; i < limit; i++) {
@@ -135,7 +127,7 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
             }
         }
 
-        Double msptAvg = snapshot.msptAvgNullable();
+        Double msptAvg = paperSnapshot.msptAvgNullable();
         if (msptAvg != null) {
             collector.recordDoubleGauge(
                     StandardMetrics.SERVER_MSPT_AVG,
@@ -145,39 +137,12 @@ public final class StandardSnapshotTelemetrySampler implements TelemetrySampler 
             );
         }
 
-        Double msptP95 = snapshot.msptP95Nullable();
+        Double msptP95 = paperSnapshot.msptP95Nullable();
         if (msptP95 != null) {
             collector.recordDoubleGauge(
                     StandardMetrics.SERVER_MSPT_P95,
                     msptP95,
                     StandardMetrics.UNIT_MILLIS,
-                    Attributes.empty()
-            );
-        }
-    }
-
-    private void emitVelocitySnapshot(VelocityTelemetrySnapshot snapshot, TelemetryCollector collector) {
-        collector.recordLongGauge(
-                StandardMetrics.PLAYERS_ONLINE,
-                snapshot.playersOnline(),
-                StandardMetrics.UNIT_COUNT,
-                Attributes.empty()
-        );
-
-        for (Map.Entry<String, Long> entry : snapshot.playersByServer().entrySet()) {
-            collector.recordLongGauge(
-                    StandardMetrics.PROXY_PLAYERS_ONLINE,
-                    entry.getValue(),
-                    StandardMetrics.UNIT_COUNT,
-                    Attributes.of(StandardMetrics.SERVER_KEY, entry.getKey())
-            );
-        }
-
-        if (!snapshot.playersByServer().isEmpty() || snapshot.registeredServers() > 0L) {
-            collector.recordLongGauge(
-                    StandardMetrics.PROXY_SERVERS_REGISTERED,
-                    snapshot.registeredServers(),
-                    StandardMetrics.UNIT_COUNT,
                     Attributes.empty()
             );
         }

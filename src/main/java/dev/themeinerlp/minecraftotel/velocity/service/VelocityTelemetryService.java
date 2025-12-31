@@ -11,7 +11,7 @@ import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.api.state.TelemetrySnapshotStore;
 import dev.themeinerlp.minecraftotel.api.state.TelemetryStateStore;
-import dev.themeinerlp.minecraftotel.metrics.StandardSnapshotTelemetrySampler;
+import dev.themeinerlp.minecraftotel.velocity.metrics.VelocityStandardSnapshotTelemetrySampler;
 import dev.themeinerlp.minecraftotel.velocity.config.VelocityPluginConfig;
 import dev.themeinerlp.minecraftotel.velocity.sampler.VelocitySnapshotSampler;
 import dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshot;
@@ -66,7 +66,7 @@ public final class VelocityTelemetryService implements TelemetryService {
         this.collector = new MeterTelemetryCollector(meter);
         this.snapshotSamplers = new CopyOnWriteArrayList<>();
         this.samplers = new CopyOnWriteArrayList<>();
-        this.samplers.add(new StandardSnapshotTelemetrySampler());
+        this.samplers.add(new VelocityStandardSnapshotTelemetrySampler());
         this.listeners = new CopyOnWriteArrayList<>();
         this.state = new TelemetrySnapshotStore(VelocityTelemetrySnapshot.empty());
     }

@@ -128,5 +128,5 @@ telemetryService.addSampler((snapshot, collector) -> {
 ```
 
 ## Notes
-- Use `StandardSnapshotTelemetrySampler` to keep metric naming consistent.
+- Keep metric naming consistent with the platform samplers (Paper and Velocity).
 - Keep sampling work lightweight; avoid blocking operations in the sampler thread.
