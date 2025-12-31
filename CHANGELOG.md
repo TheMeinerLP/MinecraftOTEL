@@ -1,3 +1,14 @@
+## 1.6.0 (2025-12-31)
+
+* build: add Gradle properties for parallel builds and caching options ([3c90c37](https://github.com/TheMeinerLP/MinecraftOTEL/commit/3c90c37))
+* build: disable Gradle configuration caching and build caching options ([0f25eb1](https://github.com/TheMeinerLP/MinecraftOTEL/commit/0f25eb1))
+* build: standardize shaded jar name ([2c4d460](https://github.com/TheMeinerLP/MinecraftOTEL/commit/2c4d460))
+* docs: reorganize docs and refresh README ([e990d51](https://github.com/TheMeinerLP/MinecraftOTEL/commit/e990d51))
+* docs(admin): add otel extension setup ([9e025e3](https://github.com/TheMeinerLP/MinecraftOTEL/commit/9e025e3))
+* chore(release): attach jar assets ([ad37bcd](https://github.com/TheMeinerLP/MinecraftOTEL/commit/ad37bcd))
+* feat(grafana): redesign and enhance MinecraftOTEL dashboards ([cdfe564](https://github.com/TheMeinerLP/MinecraftOTEL/commit/cdfe564))
+* fix(cloudnet): correct `createResource` method to return `null` when `loadWrapperServiceId` fails ([c6e6ed6](https://github.com/TheMeinerLP/MinecraftOTEL/commit/c6e6ed6))
+
 ## 1.5.0 (2025-12-30)
 
 * Merge branch 'main' of https://github.com/TheMeinerLP/MinecraftOTEL ([34e3b95](https://github.com/TheMeinerLP/MinecraftOTEL/commit/34e3b95))
