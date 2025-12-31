@@ -62,8 +62,9 @@ tasks {
 
     shadowJar {
         archiveClassifier.set("")
-        relocate("org.bstats", "net.onelitefeather.antiredstoneclockremastered.org.bstats")
+        relocate("org.bstats", "dev.themeinerlp.minecraftotel.org.bstats")
         relocate("com.google.gson", "dev.themeinerlp.minecraftotel.libs.gson")
+        archiveFileName.set("MinecraftOTEL.jar")
         dependsOn(jar)
     }
 
