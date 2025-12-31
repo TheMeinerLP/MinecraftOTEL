@@ -28,14 +28,9 @@ public class CloudNetV4ResourceProvider implements ResourceProvider {
 
     @Override
     public Resource createResource(ConfigProperties config) {
-        String configured = config.getString("otel.service.name");
-        if (configured != null && !configured.isBlank()) {
-            return Resource.empty();
-        }
-
         CloudNetServiceId serviceId = loadWrapperServiceId();
         if (serviceId == null) {
-            return Resource.empty();
+            return null;
         }
 
         String serviceName = resolveServiceName(serviceId);
