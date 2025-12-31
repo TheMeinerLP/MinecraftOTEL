@@ -1,19 +1,19 @@
-## Beschreibung
-Kurz und klar beschreiben, was sich aendert.
+## Description
+Briefly describe what changes.
 
-## Aenderungstyp
+## Change Type
 - [ ] Bugfix
 - [ ] Feature
 - [ ] Refactor
 - [ ] Docs
-- [ ] Sonstiges
+ - [ ] Other
 
 ## Tests
-- [ ] Nicht getestet
-- [ ] Lokal getestet (Details unten)
+ - [ ] Not tested
+ - [ ] Tested locally (details below)
 
-Details:
+ Details:
 
 ## Checklist
-- [ ] Ich habe bestehende Tests ausgefuehrt oder begruendet, warum nicht.
-- [ ] Ich habe relevante Dokumentation aktualisiert.
+- [ ] I ran existing tests or explained why not.
+- [ ] I updated relevant documentation.

@@ -1,29 +1,29 @@
 ---
-name: Fehlerbericht
-about: Melde einen Fehler, um uns beim Verbessern zu helfen
+name: Bug report
+about: Report a problem so we can improve
 title: "[Bug]: "
 labels: ["bug"]
 assignees: []
 ---
 
-## Beschreibung
-Kurz und praezise beschreiben, was passiert.
+## Description
+Briefly describe what happened.
 
-## Schritte zum Reproduzieren
+## Steps to Reproduce
 1.
 2.
 3.
 
-## Erwartetes Verhalten
-Was haettest du erwartet?
+## Expected Behavior
+What did you expect to happen?
 
-## Tatsachliches Verhalten
-Was ist stattdessen passiert?
+## Actual Behavior
+What happened instead?
 
-## Umgebung
+## Environment
 - OS:
 - Java/Runtime:
 - Version/Commit:
 
-## Zusatzinfos
-Logs, Screenshots oder weitere Hinweise.
+## Additional Context
+Logs, screenshots, or other details.

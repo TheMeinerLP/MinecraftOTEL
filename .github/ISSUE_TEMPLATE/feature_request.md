@@ -1,19 +1,19 @@
 ---
-name: Feature-Request
-about: Schlage eine Verbesserung oder ein neues Feature vor
+name: Feature request
+about: Suggest an improvement or a new feature
 title: "[Feature]: "
 labels: ["enhancement"]
 assignees: []
 ---
 
 ## Problem
-Welches Problem moechtest du loesen?
+What problem are you trying to solve?
 
-## Vorschlag
-Beschreibe deine Idee moeglichst konkret.
+## Proposal
+Describe your idea as clearly as possible.
 
-## Alternativen
-Welche Alternativen hast du in Betracht gezogen?
+## Alternatives
+What alternatives have you considered?
 
-## Kontext
-Weitere Details, Links oder Beispiele.
+## Context
+Additional details, links, or examples.
