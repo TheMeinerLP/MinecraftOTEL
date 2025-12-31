@@ -17,6 +17,9 @@ block and sets these resource attributes:
 - `cloudnet.task.name`
 - `cloudnet.service.name`
 
+To apply these labels at the Java agent level, load `MinecraftOTEL.jar` as an agent extension.
+See `docs/admin/installation.md`.
+
 ## Prometheus Labels
 If you use the OpenTelemetry Collector Prometheus exporter, these resource attributes are typically
 exposed as labels such as:

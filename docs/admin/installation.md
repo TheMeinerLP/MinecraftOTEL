@@ -35,6 +35,21 @@ Example (OTLP exporter to a local collector):
 -Dotel.exporter.otlp.protocol=grpc
 ```
 
+### Load MinecraftOTEL as a Java Agent Extension
+To load the MinecraftOTEL jar as an OpenTelemetry Java Agent extension (for example, to apply
+CloudNet service labels at the agent level), pass the extension property:
+
+```
+-javaagent:/path/to/opentelemetry-javaagent.jar \
+-Dotel.javaagent.extensions=/path/to/MinecraftOTEL.jar
+```
+
+You can also set `OTEL_JAVAAGENT_EXTENSIONS` to a jar or a directory containing extension jars.
+
+OpenTelemetry references:
+- Java agent configuration: https://opentelemetry.io/docs/zero-code/java/agent/configuration/
+- Java agent extensions: https://opentelemetry.io/docs/zero-code/java/agent/extensions/
+
 ## Local Observability Stack
 This repository ships a local stack with OpenTelemetry Collector, Tempo, Loki, Grafana, and
 Prometheus.
