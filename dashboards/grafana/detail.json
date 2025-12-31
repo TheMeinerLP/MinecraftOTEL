@@ -15,84 +15,91 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
-  "links": [],
+  "id": 14,
+  "links": [
+    {
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Fleet Overview",
+      "type": "link",
+      "url": "/d/minecraftotel-fleet/minecraftotel-fleet"
+    },
+    {
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "JVM Dashboard",
+      "type": "link",
+      "url": "/d/minecraftotel-jvm/minecraftotel-jvm"
+    }
+  ],
   "panels": [
     {
-      "datasource": "Prometheus",
       "fieldConfig": {
-        "defaults": {
-          "decimals": 0,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "none"
-        },
+        "defaults": {},
         "overrides": []
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 1,
+      "id": 999,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
         },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "content": "### How to read this dashboard\n- **TPS** (Ticks Per Second) ranges **0–20**. **20** is best. Below **15** is urgent.\n- **MSPT** (Milliseconds Per Tick) is the inverse view of TPS: **50ms** is the tick budget for **20 TPS**.\n- If **MSPT p95 > 50ms**, the server cannot sustain 20 TPS.\n- Use the **heatmap** to spot spike patterns, then drill down by **world** and **entity_type**.",
+        "mode": "markdown"
       },
       "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "sum(minecraft_players_online_ratio)",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Players Online",
-      "type": "stat"
+      "title": "Read me first",
+      "type": "text"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 1,
+      "panels": [],
+      "title": "Critical (KPI)",
+      "type": "row"
     },
     {
       "datasource": "Prometheus",
+      "description": "Server TPS (0–20). 20 TPS is ideal. Below 15 TPS requires urgent action.",
       "fieldConfig": {
         "defaults": {
           "decimals": 2,
           "mappings": [],
+          "max": 20,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": 0
               },
               {
-                "color": "red",
-                "value": 80
+                "color": "yellow",
+                "value": 15
+              },
+              {
+                "color": "yellow",
+                "value": 18
+              },
+              {
+                "color": "green",
+                "value": 19
               }
             ]
           },
@@ -103,8 +110,8 @@
       "gridPos": {
         "h": 4,
         "w": 6,
-        "x": 6,
-        "y": 0
+        "x": 0,
+        "y": 5
       },
       "id": 2,
       "options": {
@@ -128,22 +135,21 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "minecraft_entities_per_chunk_ratio",
+          "expr": "(minecraft_server_tps_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", window=\"1m\"})",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Entities per Chunk",
+      "title": "TPS (1m)",
       "type": "stat"
     },
     {
       "datasource": "Prometheus",
+      "description": "MSPT (milliseconds per tick). Tick budget is 50ms (20 TPS). Above 50ms means the server cannot sustain 20 TPS.",
       "fieldConfig": {
         "defaults": {
-          "decimals": 2,
+          "decimals": 1,
           "mappings": [],
-          "max": 1,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -152,20 +158,24 @@
                 "value": 0
               },
               {
+                "color": "yellow",
+                "value": 45
+              },
+              {
                 "color": "red",
-                "value": 80
+                "value": 50
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 4,
         "w": 6,
-        "x": 12,
-        "y": 0
+        "x": 6,
+        "y": 5
       },
       "id": 3,
       "options": {
@@ -189,17 +199,17 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "minecraft_chunks_loaded_per_player_ratio",
-          "legendFormat": "__auto",
+          "expr": "minecraft_server_mspt_p95_milliseconds{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Unique Chunk Ratio",
+      "title": "MSPT p95",
       "type": "stat"
     },
     {
       "datasource": "Prometheus",
+      "description": "Online players (sum). Gives context for load and performance.",
       "fieldConfig": {
         "defaults": {
           "decimals": 0,
@@ -210,10 +220,6 @@
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
@@ -224,8 +230,8 @@
       "gridPos": {
         "h": 4,
         "w": 6,
-        "x": 18,
-        "y": 0
+        "x": 12,
+        "y": 5
       },
       "id": 4,
       "options": {
@@ -249,16 +255,227 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(minecraft_chunks_loaded_ratio)",
+          "expr": "sum(minecraft_players_online_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"})",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Chunks Loaded (Total)",
+      "title": "Players Online",
       "type": "stat"
     },
     {
       "datasource": "Prometheus",
+      "description": "95th percentile tick duration derived from the histogram. Useful to spot spikes and validate MSPT.",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 5
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(minecraft_tick_duration_milliseconds_bucket{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}[5m])))",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Tick p95 (Histogram)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 6,
+      "panels": [],
+      "title": "Abstract view (performance & load)",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Server TPS (0–20). 20 TPS is ideal. Below 15 TPS requires urgent action.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "mappings": [],
+          "max": 20,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 18
+              },
+              {
+                "color": "red",
+                "value": 15
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "5m"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": true,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "(minecraft_server_tps_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\", window=\"1m\"})",
+          "legendFormat": "1m",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "(minecraft_server_tps_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\", window=\"5m\"})",
+          "legendFormat": "5m",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "(minecraft_server_tps_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\",window=\"15m\"})",
+          "legendFormat": "15m",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "TPS trend (1m/5m/15m)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "MSPT (milliseconds per tick). Tick budget is 50ms (20 TPS). Above 50ms means the server cannot sustain 20 TPS.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -308,124 +525,12 @@
                 "value": 0
               },
               {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 0,
-        "y": 4
-      },
-      "id": 5,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "minecraft_server_tps_ratio{window=\"1m\"}",
-          "legendFormat": "1m",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "minecraft_server_tps_ratio{window=\"5m\"}",
-          "hide": false,
-          "legendFormat": "5m",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "minecraft_server_tps_ratio{window=\"15m\"}",
-          "hide": false,
-          "legendFormat": "15m",
-          "range": true,
-          "refId": "C"
-        }
-      ],
-      "title": "TPS",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
+                "color": "yellow",
+                "value": 45
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 50
               }
             ]
           },
@@ -434,198 +539,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 4
-      },
-      "id": 6,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "minecraft_server_mspt_avg_milliseconds",
-          "legendFormat": "avg",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "minecraft_server_mspt_p95_milliseconds",
-          "legendFormat": "p95",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "MSPT Avg / P95",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 0,
-        "y": 10
-      },
-      "id": 7,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(minecraft_tick_duration_milliseconds_bucket[5m])))",
-          "legendFormat": "p95",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Tick Duration p95 (Histogram)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 12,
         "x": 12,
         "y": 10
@@ -648,17 +562,106 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "rate(minecraft_tick_duration_milliseconds_sum[5m]) / rate(minecraft_tick_duration_milliseconds_count[5m])",
-          "legendFormat": "avg",
+          "expr": "minecraft_server_mspt_avg_milliseconds{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}",
+          "legendFormat": "{{cloudnet_task_name}}/{{cloudnet_service_name}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "minecraft_server_mspt_p95_milliseconds{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}",
+          "legendFormat": "{{cloudnet_task_name}}/{{cloudnet_service_name}}",
+          "range": true,
+          "refId": "B"
         }
       ],
-      "title": "Tick Duration Avg",
+      "title": "MSPT avg / p95",
       "type": "timeseries"
     },
     {
       "datasource": "Prometheus",
+      "description": "Heatmap of tick duration buckets. Dense areas at higher ms indicate dangerous spikes that cause lag.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "id": 9,
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "cellValues": {
+          "unit": "ms"
+        },
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "RdGy",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1e-9
+        },
+        "legend": {
+          "show": true
+        },
+        "reverseYBuckets": false,
+        "rowsFrame": {
+          "layout": "ge",
+          "value": "Tick Duration"
+        },
+        "showValue": "never",
+        "tooltip": {
+          "mode": "single",
+          "show": true,
+          "showColorScale": false,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "ms"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum by (le) (\n  rate(minecraft_tick_duration_milliseconds_bucket{\n    cloudnet_task_name=~\"$cloudnet_task\",\n    cloudnet_service_name=~\"$cloudnet_service\",\n    exported_job=~\"$exported_job\",\n    exported_instance=~\"$exported_instance\"\n  }[5m])\n)\n",
+          "format": "heatmap",
+          "legendFormat": "{{cloudnet_task_name}}/{{cloudnet_service_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Tick duration heatmap (ms, rate over 5m)",
+      "type": "heatmap"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Total loaded chunks. Increases with players, farms, and active world area.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -705,10 +708,6 @@
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
@@ -717,102 +716,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 12,
         "x": 0,
-        "y": 16
-      },
-      "id": 9,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "minecraft_chunks_load_total{world=~\"$world\"}",
-          "legendFormat": "{{world}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Chunks Loaded by World",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "ops"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 16
+        "y": 26
       },
       "id": 10,
       "options": {
@@ -831,26 +738,19 @@
       "pluginVersion": "12.3.1",
       "targets": [
         {
-          "expr": "rate(minecraft_chunks_load_total[5m])",
-          "legendFormat": "load",
+          "editorMode": "code",
+          "expr": "sum(minecraft_chunks_loaded_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"})",
+          "legendFormat": "{{cloudnet_task_name}}/{{cloudnet_service_name}}",
+          "range": true,
           "refId": "A"
-        },
-        {
-          "expr": "rate(minecraft_chunks_unload_total[5m])",
-          "legendFormat": "unload",
-          "refId": "B"
-        },
-        {
-          "expr": "rate(minecraft_chunks_generated_total[5m])",
-          "legendFormat": "generated",
-          "refId": "C"
         }
       ],
-      "title": "Chunk Load/Unload/Generate Rate",
+      "title": "Chunks loaded (total)",
       "type": "timeseries"
     },
     {
       "datasource": "Prometheus",
+      "description": "Total loaded entities. High entity counts often correlate with higher MSPT.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -897,10 +797,6 @@
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
@@ -909,10 +805,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 12,
-        "x": 0,
-        "y": 22
+        "x": 12,
+        "y": 26
       },
       "id": 11,
       "options": {
@@ -932,297 +828,13 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "minecraft_entities_loaded_ratio{world=~\"$world\"}",
-          "legendFormat": "{{world}}",
+          "expr": "sum(minecraft_entities_loaded_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"})",
+          "legendFormat": "{{cloudnet_service_name}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Entities Loaded by World",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 22
-      },
-      "id": 12,
-      "options": {
-        "legend": {
-          "calcs": [
-            "last"
-          ],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "minecraft_entities_loaded_by_type_ratio{entity_type=~\"$entity_type\"}",
-          "legendFormat": "{{entity_type}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Entities Loaded by Type",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "ops"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 0,
-        "y": 28
-      },
-      "id": 13,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "expr": "rate(minecraft_entities_added_total[5m])",
-          "legendFormat": "added",
-          "refId": "A"
-        },
-        {
-          "expr": "rate(minecraft_entities_removed_total[5m])",
-          "legendFormat": "removed",
-          "refId": "B"
-        }
-      ],
-      "title": "Entities Added/Removed Rate",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "description": "Requires entitiesByChunk.mode = light or heavy. High cardinality in heavy mode.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 28
-      },
-      "id": 14,
-      "options": {
-        "legend": {
-          "calcs": [
-            "last"
-          ],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "topk(10, minecraft_entities_loaded_by_type_chunk_ratio{world=~\"$world\", entity_type=~\"$entity_type\"})",
-          "legendFormat": "{{world}} {{chunk_x}},{{chunk_z}} {{entity_type}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Entity Types by Chunk (Top 10)",
+      "title": "Entities loaded (total)",
       "type": "timeseries"
     },
     {
@@ -1231,15 +843,16 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 33
       },
-      "id": 15,
+      "id": 12,
       "panels": [],
-      "title": "JVM",
+      "title": "Detail view (world / entity drilldown)",
       "type": "row"
     },
     {
       "datasource": "Prometheus",
+      "description": "Loaded chunks per world. Use $world to isolate worlds.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1286,29 +899,27 @@
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
-          "unit": "bytes"
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 12,
         "x": 0,
-        "y": 35
+        "y": 34
       },
-      "id": 16,
+      "id": 13,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -1321,17 +932,18 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "jvm_memory_used_bytes{area=\"heap\", jvm_memory_pool_name=~\"$jvm_pool\"}",
-          "legendFormat": "{{jvm_memory_pool_name}}",
+          "expr": "minecraft_chunks_load_total{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}",
+          "legendFormat": "{{cloudnet_service_name}}/{{world}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "JVM Heap Used",
+      "title": "Chunks loaded by world",
       "type": "timeseries"
     },
     {
       "datasource": "Prometheus",
+      "description": "Rates over time. High 'generated' often means exploration or missing world pre-generation.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1378,29 +990,27 @@
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
-          "unit": "bytes"
+          "unit": "ops"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 12,
         "x": 12,
-        "y": 35
+        "y": 34
       },
-      "id": 17,
+      "id": 14,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -1412,16 +1022,33 @@
       "pluginVersion": "12.3.1",
       "targets": [
         {
-          "expr": "jvm_memory_used_bytes{area=\"non_heap\", jvm_memory_pool_name=~\"$jvm_pool\"}",
-          "legendFormat": "{{jvm_memory_pool_name}}",
+          "editorMode": "code",
+          "expr": "rate(minecraft_chunks_load_total{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}[5m])",
+          "legendFormat": "L {{cloudnet_service_name}}/{{world}}",
+          "range": true,
           "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "rate(minecraft_chunks_unload_total{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}[5m])",
+          "legendFormat": "UL {{cloudnet_service_name}}/{{world}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "rate(minecraft_chunks_generated_total{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}[5m])",
+          "legendFormat": "G {{cloudnet_service_name}}/{{world}}",
+          "range": true,
+          "refId": "C"
         }
       ],
-      "title": "JVM Non-Heap Used",
+      "title": "Chunk load/unload/generate rate",
       "type": "timeseries"
     },
     {
       "datasource": "Prometheus",
+      "description": "Entity load trend per world.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1468,100 +1095,6 @@
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "s/s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 0,
-        "y": 41
-      },
-      "id": 18,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "expr": "rate(process_runtime_jvm_gc_duration_seconds_sum[5m])",
-          "legendFormat": "gc sec/s",
-          "refId": "A"
-        }
-      ],
-      "title": "JVM GC Pause Rate",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
@@ -1570,17 +1103,19 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 12,
-        "x": 12,
+        "x": 0,
         "y": 41
       },
-      "id": 19,
+      "id": 15,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -1592,16 +1127,19 @@
       "pluginVersion": "12.3.1",
       "targets": [
         {
-          "expr": "process_runtime_jvm_threads_count",
-          "legendFormat": "threads",
+          "editorMode": "code",
+          "expr": "minecraft_entities_loaded_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}",
+          "legendFormat": "{{cloudnet_service_name}}/{{world}}",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "JVM Threads",
+      "title": "Entities loaded by world",
       "type": "timeseries"
     },
     {
       "datasource": "Prometheus",
+      "description": "Entity counts by type. Use $entity_type to isolate offenders (items, villagers, etc.).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1642,37 +1180,127 @@
             }
           },
           "mappings": [],
-          "max": 1,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 12,
-        "x": 0,
-        "y": 47
+        "x": 12,
+        "y": 41
       },
-      "id": 20,
+      "id": 16,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Name",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "minecraft_entities_loaded_by_type_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}",
+          "interval": "",
+          "legendFormat": "{{entity_type}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Entities loaded by type",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Entity churn. High adds without matching removes can indicate spikes, leaks, or farms.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -1684,12 +1312,21 @@
       "pluginVersion": "12.3.1",
       "targets": [
         {
-          "expr": "process_runtime_jvm_cpu_utilization",
-          "legendFormat": "cpu",
+          "editorMode": "code",
+          "expr": "rate(minecraft_entities_added_total{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}[5m])",
+          "legendFormat": "+{{cloudnet_service_name}}/{{world}}",
+          "range": true,
           "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "rate(minecraft_entities_removed_total{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}[5m])",
+          "legendFormat": "-{{cloudnet_service_name}}/{{world}}",
+          "range": true,
+          "refId": "B"
         }
       ],
-      "title": "JVM CPU Utilization",
+      "title": "Entities add/remove rate",
       "type": "timeseries"
     }
   ],
@@ -1704,58 +1341,107 @@
     "list": [
       {
         "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
         "datasource": "Prometheus",
         "includeAll": true,
+        "label": "CloudNet Task",
         "multi": true,
-        "name": "world",
+        "name": "cloudnet_task",
         "options": [],
-        "query": "label_values(minecraft_chunks_loaded, world)",
+        "query": "label_values(minecraft_server_tps_ratio, cloudnet_task_name)",
         "refresh": 2,
         "type": "query"
       },
       {
-        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "Prometheus",
-        "includeAll": true,
-        "multi": true,
-        "name": "entity_type",
+        "includeAll": false,
+        "label": "CloudNet Service",
+        "name": "cloudnet_service",
         "options": [],
-        "query": "label_values(minecraft_entities_loaded_by_type, entity_type)",
+        "query": "label_values(minecraft_server_tps_ratio{cloudnet_task_name=~\"$cloudnet_task\"}, cloudnet_service_name)",
         "refresh": 2,
         "type": "query"
       },
       {
         "allValue": ".*",
         "current": {
-          "text": "1m",
-          "value": "1m"
+          "text": "All",
+          "value": "$__all"
         },
-        "includeAll": true,
-        "multi": true,
-        "name": "tps_window",
-        "query": "1m,5m,15m",
-        "type": "custom"
+        "datasource": "Prometheus",
+        "hide": 2,
+        "includeAll": false,
+        "label": "exported_job (optional)",
+        "name": "exported_job",
+        "options": [],
+        "query": "label_values(minecraft_server_tps_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\"}, exported_job)",
+        "refresh": 2,
+        "type": "query"
       },
       {
         "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "hide": 2,
+        "includeAll": false,
+        "label": "exported_instance (optional)",
+        "name": "exported_instance",
+        "options": [],
+        "query": "label_values(minecraft_server_tps_ratio{cloudnet_task_name=~\"$cloudnet_task\", cloudnet_service_name=~\"$cloudnet_service\", exported_job=~\"$exported_job\"}, exported_instance)",
+        "refresh": 2,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "Prometheus",
         "includeAll": true,
         "multi": true,
-        "name": "jvm_pool",
+        "name": "world",
         "options": [],
-        "query": "label_values(jvm_memory_used_bytes, jvm_memory_pool_name)",
+        "query": "label_values(minecraft_chunks_loaded{exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}, world)",
+        "refresh": 2,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "includeAll": true,
+        "multi": true,
+        "name": "entity_type",
+        "options": [],
+        "query": "label_values(minecraft_entities_loaded_by_type{exported_job=~\"$exported_job\", exported_instance=~\"$exported_instance\"}, entity_type)",
         "refresh": 2,
         "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "MinecraftOTEL + JVM",
-  "uid": "minecraftotel",
-  "version": 1
+  "title": "MinecraftOTEL - Server Detail (Overview + Drilldown)",
+  "uid": "minecraftotel-main",
+  "version": 17
 }
