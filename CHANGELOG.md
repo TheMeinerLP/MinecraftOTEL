@@ -1,3 +1,14 @@
+## <small>1.6.1 (2026-10-30)</small>
+
+* fix(velocity): start sampling and keep proxy gauges current (#7) ([b5b09b2](https://github.com/TheMeinerLP/MinecraftOTEL/commit/b5b09b2)), closes [#7](https://github.com/TheMeinerLP/MinecraftOTEL/issues/7)
+* docs: add community guidelines and security policy ([1d4f9fe](https://github.com/TheMeinerLP/MinecraftOTEL/commit/1d4f9fe))
+* docs: update issue and pull request templates to use consistent English wording ([7063da7](https://github.com/TheMeinerLP/MinecraftOTEL/commit/7063da7))
+* docs(openspec): propose fix-velocity-sampling (#6) ([8b3e5fc](https://github.com/TheMeinerLP/MinecraftOTEL/commit/8b3e5fc)), closes [#6](https://github.com/TheMeinerLP/MinecraftOTEL/issues/6)
+* chore(openspec): initialize openspec (#5) ([f2b6b52](https://github.com/TheMeinerLP/MinecraftOTEL/commit/f2b6b52)), closes [#5](https://github.com/TheMeinerLP/MinecraftOTEL/issues/5)
+* refactor: split platform samplers into separate implementations ([b21f436](https://github.com/TheMeinerLP/MinecraftOTEL/commit/b21f436))
+* Merge branch 'main' of https://github.com/TheMeinerLP/MinecraftOTEL ([f15ad2b](https://github.com/TheMeinerLP/MinecraftOTEL/commit/f15ad2b))
+* ci: add GitHub Actions workflow to publish Javadocs on release ([900eff5](https://github.com/TheMeinerLP/MinecraftOTEL/commit/900eff5))
+
 ## 1.6.0 (2025-12-31)
 
 * build: add Gradle properties for parallel builds and caching options ([3c90c37](https://github.com/TheMeinerLP/MinecraftOTEL/commit/3c90c37))
