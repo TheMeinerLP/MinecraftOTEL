@@ -1,0 +1,19 @@
+schema: spec-driven
+
+context: |
+  MinecraftOTEL is a single-module Gradle project (Java 21+, CI on Java 25) that ships one
+  shaded jar working as a Paper plugin, a Velocity plugin and an OpenTelemetry Java agent
+  extension. Code lives in src/main/java/dev/themeinerlp/minecraftotel with packages api
+  (platform-neutral public API), paper, velocity and cloudnet.
+  Metrics are native OpenTelemetry, documented in docs/admin/metrics.md.
+  Repository text is English only and never uses em dashes.
+  Commits and pull request titles follow Conventional Commits (lower case, imperative,
+  no trailing period); semantic-release reads them.
+
+rules:
+  proposal:
+    - Name the Conventional Commits type and scope the change ships under (for example
+      `fix(velocity)`); a change that mixes types is split into several changes.
+  tasks:
+    - The last task opens the pull request, titled with the Conventional Commit from the proposal.
+    - Test tasks come before the production code they cover (red, then green).
