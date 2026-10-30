@@ -28,7 +28,20 @@ sampling.intervalSeconds=1
 otel.enable.playersPerServer=true
 # total registered backend servers
 otel.enable.serverCount=true
+# players per client version (minecraft.proxy.players.by_version)
+otel.enable.playersByVersion=true
+# latency of every online player on each sample (minecraft.proxy.player.latency)
+otel.enable.playerLatency=true
+# status ping of every registered backend (minecraft.proxy.server.up and latency)
+otel.enable.backendHealth=true
+# seconds between backend probes, clamped to 5-300
+backendHealth.intervalSeconds=30
 ```
+
+Backend health sends one status ping per backend from each proxy every
+`backendHealth.intervalSeconds`. The pings show up in the backend logs. Set
+`otel.enable.backendHealth=false` to stop them. Existing files without the new keys use these
+defaults.
 
 ## Dashboard
 The current Grafana dashboard is CloudNet v4-specific and uses `exported_job` and
