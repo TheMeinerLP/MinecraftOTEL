@@ -28,6 +28,7 @@ import org.slf4j.Logger;
  * Coordinates config loading, metrics registration, and sampling for Velocity.
  */
 public final class VelocityTelemetryService implements TelemetryService {
+    private final Object plugin;
     private final ProxyServer proxyServer;
     private final Logger logger;
     private final Path dataDirectory;
@@ -44,17 +45,20 @@ public final class VelocityTelemetryService implements TelemetryService {
     /**
      * Creates a telemetry coordinator for a Velocity proxy instance.
      *
+     * @param plugin registered Velocity plugin instance that owns the sampling task
      * @param proxyServer Velocity proxy server
      * @param logger logger for lifecycle messages
      * @param dataDirectory data directory for config persistence
      * @param version plugin version for instrumentation metadata
      */
     public VelocityTelemetryService(
+            Object plugin,
             ProxyServer proxyServer,
             Logger logger,
             Path dataDirectory,
             String version
     ) {
+        this.plugin = plugin;
         this.proxyServer = proxyServer;
         this.logger = logger;
         this.dataDirectory = dataDirectory;
@@ -164,7 +168,7 @@ public final class VelocityTelemetryService implements TelemetryService {
 
     private void startSamplingTask() {
         samplingTask = proxyServer.getScheduler()
-                .buildTask(this, this::sampleOnce)
+                .buildTask(plugin, this::sampleOnce)
                 .repeat(Duration.ofSeconds(config.intervalSeconds))
                 .schedule();
     }
