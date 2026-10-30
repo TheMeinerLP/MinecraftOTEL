@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 class VelocityStandardSnapshotTelemetrySamplerTest {
     private static final AttributeKey<String> SERVER = AttributeKey.stringKey("server");
+    private static final AttributeKey<String> VERSION = AttributeKey.stringKey("version");
 
     @Test
     void replacedPerServerValuesOmitBackendThatWasUnregistered() {
@@ -60,18 +61,65 @@ class VelocityStandardSnapshotTelemetrySamplerTest {
         );
     }
 
-    private static VelocityTelemetrySnapshot snapshot(Map<String, Long> playersByServer, long registeredServers) {
+    @Test
+    void versionSeriesOfVersionNoLongerInUseIsRemoved() {
+        VelocityStandardSnapshotTelemetrySampler sampler = new VelocityStandardSnapshotTelemetrySampler(true);
+        RecordingCollector collector = new RecordingCollector();
+
+        sampler.sample(snapshot(Map.of(), 1L, Map.of("1.21.4", 2L, "1.21.5", 1L), List.of()), collector);
+        sampler.sample(snapshot(Map.of(), 1L, Map.of("1.21.5", 1L), List.of()), collector);
+
+        assertEquals(
+                Map.of(Attributes.of(VERSION, "1.21.5"), 1L),
+                collector.lastReplaced(StandardMetrics.PROXY_PLAYERS_BY_VERSION),
+                "a version that no player uses any more must not stay exported"
+        );
+    }
+
+    @Test
+    void recordsEachPlayerLatencyAsMillisecondHistogramValue() {
+        VelocityStandardSnapshotTelemetrySampler sampler = new VelocityStandardSnapshotTelemetrySampler(true);
+        RecordingCollector collector = new RecordingCollector();
+
+        sampler.sample(snapshot(Map.of(), 1L, Map.of(), List.of(42L, 7L)), collector);
+
+        assertEquals(
+                List.of(42.0, 7.0),
+                collector.histogramValues(StandardMetrics.PROXY_PLAYER_LATENCY),
+                "every known player latency must be recorded as one histogram value"
+        );
+        assertEquals(
+                StandardMetrics.UNIT_MILLIS,
+                collector.histogramUnit(StandardMetrics.PROXY_PLAYER_LATENCY),
+                "player latency must be reported in milliseconds"
+        );
+    }
+
+    private static VelocityTelemetrySnapshot snapshot(
+            Map<String, Long> playersByServer,
+            long registeredServers,
+            Map<String, Long> playersByVersion,
+            List<Long> playerLatencies
+    ) {
         return new VelocityTelemetrySnapshotBuilder()
                 .setPlayersOnline(playersByServer.values().stream().mapToLong(Long::longValue).sum())
                 .setPlayersByServer(playersByServer)
                 .setRegisteredServers(registeredServers)
+                .setPlayersByVersion(playersByVersion)
+                .setPlayerLatencies(playerLatencies)
                 .build();
+    }
+
+    private static VelocityTelemetrySnapshot snapshot(Map<String, Long> playersByServer, long registeredServers) {
+        return snapshot(playersByServer, registeredServers, Map.of(), List.of());
     }
 
     private static final class RecordingCollector implements TelemetryCollector {
         private final Map<String, Map<Attributes, Long>> replaced = new HashMap<>();
         private final List<String> longGaugeNames = new ArrayList<>();
         private final List<Long> longGaugeValues = new ArrayList<>();
+        private final Map<String, List<Double>> histogramValues = new HashMap<>();
+        private final Map<String, String> histogramUnits = new HashMap<>();
 
         Map<Attributes, Long> lastReplaced(String name) {
             return replaced.get(name);
@@ -85,6 +133,14 @@ class VelocityStandardSnapshotTelemetrySamplerTest {
                 }
             }
             return values;
+        }
+
+        List<Double> histogramValues(String name) {
+            return histogramValues.getOrDefault(name, List.of());
+        }
+
+        String histogramUnit(String name) {
+            return histogramUnits.get(name);
         }
 
         boolean recordedLongGauge(String name) {
@@ -112,6 +168,8 @@ class VelocityStandardSnapshotTelemetrySamplerTest {
 
         @Override
         public void recordDoubleHistogram(String name, double value, String unit, Attributes attributes) {
+            histogramValues.computeIfAbsent(name, key -> new ArrayList<>()).add(value);
+            histogramUnits.put(name, unit);
         }
     }
 }

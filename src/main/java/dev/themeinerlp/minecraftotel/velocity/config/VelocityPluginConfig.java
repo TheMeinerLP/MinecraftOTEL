@@ -15,19 +15,27 @@ public final class VelocityPluginConfig {
     public static final String KEY_INTERVAL_SECONDS = "sampling.intervalSeconds";
     public static final String KEY_ENABLE_PLAYERS_PER_SERVER = "otel.enable.playersPerServer";
     public static final String KEY_ENABLE_SERVER_COUNT = "otel.enable.serverCount";
+    public static final String KEY_ENABLE_PLAYERS_BY_VERSION = "otel.enable.playersByVersion";
+    public static final String KEY_ENABLE_PLAYER_LATENCY = "otel.enable.playerLatency";
 
     public final int intervalSeconds;
     public final boolean enablePlayersPerServer;
     public final boolean enableServerCount;
+    public final boolean enablePlayersByVersion;
+    public final boolean enablePlayerLatency;
 
     private VelocityPluginConfig(
             int intervalSeconds,
             boolean enablePlayersPerServer,
-            boolean enableServerCount
+            boolean enableServerCount,
+            boolean enablePlayersByVersion,
+            boolean enablePlayerLatency
     ) {
         this.intervalSeconds = intervalSeconds;
         this.enablePlayersPerServer = enablePlayersPerServer;
         this.enableServerCount = enableServerCount;
+        this.enablePlayersByVersion = enablePlayersByVersion;
+        this.enablePlayerLatency = enablePlayerLatency;
     }
 
     /**
@@ -68,11 +76,21 @@ public final class VelocityPluginConfig {
                 properties.getProperty(KEY_ENABLE_SERVER_COUNT),
                 true
         );
+        boolean enablePlayersByVersion = parseBoolean(
+                properties.getProperty(KEY_ENABLE_PLAYERS_BY_VERSION),
+                true
+        );
+        boolean enablePlayerLatency = parseBoolean(
+                properties.getProperty(KEY_ENABLE_PLAYER_LATENCY),
+                true
+        );
 
         return new VelocityPluginConfig(
                 intervalSeconds,
                 enablePlayersPerServer,
-                enableServerCount
+                enableServerCount,
+                enablePlayersByVersion,
+                enablePlayerLatency
         );
     }
 

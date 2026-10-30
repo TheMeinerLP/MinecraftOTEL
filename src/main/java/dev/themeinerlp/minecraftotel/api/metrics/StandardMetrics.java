@@ -44,6 +44,10 @@ public final class StandardMetrics {
     public static final String PROXY_PINGS = "minecraft.proxy.pings_total";
     /** @since 1.7.0 */
     public static final String PROXY_SESSION_DURATION = "minecraft.proxy.session.duration";
+    /** @since 1.7.0 */
+    public static final String PROXY_PLAYERS_BY_VERSION = "minecraft.proxy.players.by_version";
+    /** @since 1.7.0 */
+    public static final String PROXY_PLAYER_LATENCY = "minecraft.proxy.player.latency";
 
     public static final AttributeKey<String> WORLD_KEY = AttributeKey.stringKey("world");
     public static final AttributeKey<String> WINDOW_KEY = AttributeKey.stringKey("window");
@@ -55,6 +59,8 @@ public final class StandardMetrics {
     public static final AttributeKey<String> RESULT_KEY = AttributeKey.stringKey("result");
     /** @since 1.7.0 */
     public static final AttributeKey<String> REASON_KEY = AttributeKey.stringKey("reason");
+    /** @since 1.7.0 */
+    public static final AttributeKey<String> VERSION_KEY = AttributeKey.stringKey("version");
 
     public static final String[] TPS_WINDOWS = {"1m", "5m", "15m"};
 
