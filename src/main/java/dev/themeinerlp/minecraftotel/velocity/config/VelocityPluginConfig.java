@@ -17,20 +17,28 @@ public final class VelocityPluginConfig {
     public static final String KEY_ENABLE_SERVER_COUNT = "otel.enable.serverCount";
     public static final String KEY_ENABLE_PLAYERS_BY_VERSION = "otel.enable.playersByVersion";
     public static final String KEY_ENABLE_PLAYER_LATENCY = "otel.enable.playerLatency";
+    public static final String KEY_ENABLE_BACKEND_HEALTH = "otel.enable.backendHealth";
+    public static final String KEY_BACKEND_HEALTH_INTERVAL_SECONDS = "backendHealth.intervalSeconds";
 
     public final int intervalSeconds;
     public final boolean enablePlayersPerServer;
     public final boolean enableServerCount;
     public final boolean enablePlayersByVersion;
     public final boolean enablePlayerLatency;
+    public final boolean enableBackendHealth;
+    public final int backendHealthIntervalSeconds;
 
     private VelocityPluginConfig(
             int intervalSeconds,
             boolean enablePlayersPerServer,
             boolean enableServerCount,
             boolean enablePlayersByVersion,
-            boolean enablePlayerLatency
+            boolean enablePlayerLatency,
+            boolean enableBackendHealth,
+            int backendHealthIntervalSeconds
     ) {
+        this.enableBackendHealth = enableBackendHealth;
+        this.backendHealthIntervalSeconds = backendHealthIntervalSeconds;
         this.intervalSeconds = intervalSeconds;
         this.enablePlayersPerServer = enablePlayersPerServer;
         this.enableServerCount = enableServerCount;
@@ -85,12 +93,24 @@ public final class VelocityPluginConfig {
                 true
         );
 
+        boolean enableBackendHealth = parseBoolean(
+                properties.getProperty(KEY_ENABLE_BACKEND_HEALTH),
+                true
+        );
+        int backendHealthIntervalSeconds = clamp(
+                parseInt(properties.getProperty(KEY_BACKEND_HEALTH_INTERVAL_SECONDS), 30),
+                5,
+                300
+        );
+
         return new VelocityPluginConfig(
                 intervalSeconds,
                 enablePlayersPerServer,
                 enableServerCount,
                 enablePlayersByVersion,
-                enablePlayerLatency
+                enablePlayerLatency,
+                enableBackendHealth,
+                backendHealthIntervalSeconds
         );
     }
 

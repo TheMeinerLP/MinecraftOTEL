@@ -11,6 +11,7 @@ import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.api.state.TelemetrySnapshotStore;
 import dev.themeinerlp.minecraftotel.api.state.TelemetryStateStore;
+import dev.themeinerlp.minecraftotel.velocity.health.VelocityBackendProbe;
 import dev.themeinerlp.minecraftotel.velocity.listener.VelocityConnectionListener;
 import dev.themeinerlp.minecraftotel.velocity.metrics.VelocityStandardSnapshotTelemetrySampler;
 import dev.themeinerlp.minecraftotel.velocity.config.VelocityPluginConfig;
@@ -30,6 +31,8 @@ import org.slf4j.Logger;
  * Coordinates config loading, metrics registration, and sampling for Velocity.
  */
 public final class VelocityTelemetryService implements TelemetryService {
+    private static final Duration BACKEND_PROBE_TIMEOUT = Duration.ofSeconds(5);
+
     private final Object plugin;
     private final ProxyServer proxyServer;
     private final Logger logger;
@@ -44,6 +47,7 @@ public final class VelocityTelemetryService implements TelemetryService {
     private final TelemetryStateStore state;
     private ScheduledTask samplingTask;
     private VelocityConnectionListener connectionListener;
+    private ScheduledTask backendProbeTask;
     private volatile boolean running;
 
     /**
@@ -105,10 +109,17 @@ public final class VelocityTelemetryService implements TelemetryService {
 
         sampleOnce();
         startSamplingTask();
+        if (config.enableBackendHealth) {
+            startBackendProbeTask();
+        }
 
         logger.info("Velocity sampling interval: {}s", config.intervalSeconds);
         logger.info("Velocity per-server players enabled: {}", config.enablePlayersPerServer);
         logger.info("Velocity server count enabled: {}", config.enableServerCount);
+        logger.info("Velocity players by version enabled: {}", config.enablePlayersByVersion);
+        logger.info("Velocity player latency enabled: {}", config.enablePlayerLatency);
+        logger.info("Velocity backend health enabled: {}", config.enableBackendHealth);
+        logger.info("Velocity backend health interval: {}s", config.backendHealthIntervalSeconds);
     }
 
     @Override
@@ -175,6 +186,10 @@ public final class VelocityTelemetryService implements TelemetryService {
             samplingTask.cancel();
             samplingTask = null;
         }
+        if (backendProbeTask != null) {
+            backendProbeTask.cancel();
+            backendProbeTask = null;
+        }
         if (connectionListener != null) {
             proxyServer.getEventManager().unregisterListener(plugin, connectionListener);
             connectionListener = null;
@@ -185,6 +200,19 @@ public final class VelocityTelemetryService implements TelemetryService {
         samplingTask = proxyServer.getScheduler()
                 .buildTask(plugin, this::sampleOnce)
                 .repeat(Duration.ofSeconds(config.intervalSeconds))
+                .schedule();
+    }
+
+    private void startBackendProbeTask() {
+        VelocityBackendProbe probe = new VelocityBackendProbe(
+                proxyServer,
+                collector,
+                clock,
+                BACKEND_PROBE_TIMEOUT
+        );
+        backendProbeTask = proxyServer.getScheduler()
+                .buildTask(plugin, probe::probe)
+                .repeat(Duration.ofSeconds(config.backendHealthIntervalSeconds))
                 .schedule();
     }
 

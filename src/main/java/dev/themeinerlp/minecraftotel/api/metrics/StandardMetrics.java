@@ -47,6 +47,10 @@ public final class StandardMetrics {
     /** @since 1.7.0 */
     public static final String PROXY_PLAYERS_BY_VERSION = "minecraft.proxy.players.by_version";
     /** @since 1.7.0 */
+    public static final String PROXY_SERVER_UP = "minecraft.proxy.server.up";
+    /** @since 1.7.0 */
+    public static final String PROXY_SERVER_LATENCY = "minecraft.proxy.server.latency";
+    /** @since 1.7.0 */
     public static final String PROXY_PLAYER_LATENCY = "minecraft.proxy.player.latency";
 
     public static final AttributeKey<String> WORLD_KEY = AttributeKey.stringKey("world");
