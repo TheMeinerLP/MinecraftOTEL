@@ -11,6 +11,7 @@ import dev.themeinerlp.minecraftotel.api.core.MinecraftOtelApiProvider;
 import dev.themeinerlp.minecraftotel.velocity.service.VelocityTelemetryService;
 import dev.themeinerlp.minecraftotel.velocity.api.VelocityMinecraftOtelApi;
 import java.nio.file.Path;
+import java.time.Clock;
 import org.slf4j.Logger;
 
 /**
@@ -42,7 +43,8 @@ public final class MinecraftOTELVelocityPlugin {
                 proxyServer,
                 logger,
                 dataDirectory,
-                version
+                version,
+                Clock.systemUTC()
         );
         api = new VelocityMinecraftOtelApi(version, telemetryService);
         MinecraftOtelApiProvider.register(api);

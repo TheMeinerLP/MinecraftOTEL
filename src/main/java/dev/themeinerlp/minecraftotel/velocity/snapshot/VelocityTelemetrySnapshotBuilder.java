@@ -1,6 +1,7 @@
 package dev.themeinerlp.minecraftotel.velocity.snapshot;
 
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotBuilder;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,6 +11,8 @@ public final class VelocityTelemetrySnapshotBuilder implements TelemetrySnapshot
     private Long playersOnline;
     private Map<String, Long> playersByServer;
     private Long registeredServers;
+    private Map<String, Long> playersByVersion;
+    private List<Long> playerLatencies;
 
     /**
      * Sets the online player count.
@@ -45,6 +48,30 @@ public final class VelocityTelemetrySnapshotBuilder implements TelemetrySnapshot
     }
 
     /**
+     * Sets online players per client version name.
+     *
+     * @param playersByVersion players per version
+     * @return builder
+     * @since 1.7.0
+     */
+    public VelocityTelemetrySnapshotBuilder setPlayersByVersion(Map<String, Long> playersByVersion) {
+        this.playersByVersion = playersByVersion;
+        return this;
+    }
+
+    /**
+     * Sets the known latency in milliseconds of online players.
+     *
+     * @param playerLatencies latencies, one per player with a known ping
+     * @return builder
+     * @since 1.7.0
+     */
+    public VelocityTelemetrySnapshotBuilder setPlayerLatencies(List<Long> playerLatencies) {
+        this.playerLatencies = playerLatencies;
+        return this;
+    }
+
+    /**
      * Builds the immutable Velocity snapshot.
      *
      * @return snapshot
@@ -53,7 +80,9 @@ public final class VelocityTelemetrySnapshotBuilder implements TelemetrySnapshot
         return new VelocityTelemetrySnapshot(
                 playersOnline == null ? 0L : playersOnline,
                 playersByServer == null ? Map.of() : playersByServer,
-                registeredServers == null ? 0L : registeredServers
+                registeredServers == null ? 0L : registeredServers,
+                playersByVersion == null ? Map.of() : playersByVersion,
+                playerLatencies == null ? List.of() : playerLatencies
         );
     }
 }

@@ -1,13 +1,16 @@
 package dev.themeinerlp.minecraftotel.velocity.sampler;
 
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotBuilder;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshotSampler;
 import dev.themeinerlp.minecraftotel.velocity.config.VelocityPluginConfig;
 import dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshotBuilder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,17 +30,46 @@ public final class VelocitySnapshotSampler implements TelemetrySnapshotSampler {
         if (!(builder instanceof VelocityTelemetrySnapshotBuilder velocityBuilder)) {
             return;
         }
-        long playersOnline = proxyServer.getAllPlayers().size();
+        Collection<Player> players = proxyServer.getAllPlayers();
+        long playersOnline = players.size();
         Collection<RegisteredServer> servers = proxyServer.getAllServers();
         long registeredServers = config.enableServerCount ? servers.size() : 0L;
         Map<String, Long> playersByServer = config.enablePlayersPerServer
                 ? mapPlayersByServer(servers)
                 : Map.of();
+        Map<String, Long> playersByVersion = config.enablePlayersByVersion
+                ? mapPlayersByVersion(players)
+                : Map.of();
+        List<Long> playerLatencies = config.enablePlayerLatency
+                ? playerLatencies(players)
+                : List.of();
 
         velocityBuilder
                 .setPlayersOnline(playersOnline)
                 .setPlayersByServer(playersByServer)
-                .setRegisteredServers(registeredServers);
+                .setRegisteredServers(registeredServers)
+                .setPlayersByVersion(playersByVersion)
+                .setPlayerLatencies(playerLatencies);
+    }
+
+    private static Map<String, Long> mapPlayersByVersion(Collection<Player> players) {
+        Map<String, Long> playersByVersion = new HashMap<>();
+        for (Player player : players) {
+            String version = player.getProtocolVersion().getMostRecentSupportedVersion();
+            playersByVersion.merge(version, 1L, Long::sum);
+        }
+        return Map.copyOf(playersByVersion);
+    }
+
+    private static List<Long> playerLatencies(Collection<Player> players) {
+        List<Long> latencies = new ArrayList<>();
+        for (Player player : players) {
+            long ping = player.getPing();
+            if (ping >= 0) {
+                latencies.add(ping);
+            }
+        }
+        return List.copyOf(latencies);
     }
 
     private static Map<String, Long> mapPlayersByServer(Collection<RegisteredServer> servers) {

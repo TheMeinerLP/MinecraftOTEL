@@ -56,6 +56,29 @@ public final class VelocityStandardSnapshotTelemetrySampler implements Telemetry
                     Attributes.empty()
             );
         }
+
+        collector.replaceLongGauge(
+                StandardMetrics.PROXY_PLAYERS_BY_VERSION,
+                perVersionValues(velocitySnapshot.playersByVersion()),
+                StandardMetrics.UNIT_COUNT
+        );
+
+        for (long latency : velocitySnapshot.playerLatencies()) {
+            collector.recordDoubleHistogram(
+                    StandardMetrics.PROXY_PLAYER_LATENCY,
+                    latency,
+                    StandardMetrics.UNIT_MILLIS,
+                    Attributes.empty()
+            );
+        }
+    }
+
+    private static Map<Attributes, Long> perVersionValues(Map<String, Long> playersByVersion) {
+        Map<Attributes, Long> values = new HashMap<>();
+        for (Map.Entry<String, Long> entry : playersByVersion.entrySet()) {
+            values.put(Attributes.of(StandardMetrics.VERSION_KEY, entry.getKey()), entry.getValue());
+        }
+        return values;
     }
 
     private static Map<Attributes, Long> perServerValues(Map<String, Long> playersByServer) {
