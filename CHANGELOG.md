@@ -1,3 +1,10 @@
+## 1.7.0 (2026-10-30)
+
+* feat(velocity): add network, session and backend metrics (#11) ([283d947](https://github.com/TheMeinerLP/MinecraftOTEL/commit/283d947)), closes [#11](https://github.com/TheMeinerLP/MinecraftOTEL/issues/11)
+* fix(velocity): report the plugin version (#10) ([90b136d](https://github.com/TheMeinerLP/MinecraftOTEL/commit/90b136d)), closes [#10](https://github.com/TheMeinerLP/MinecraftOTEL/issues/10)
+* build(deps): update release tooling dependencies (#9) ([42b709e](https://github.com/TheMeinerLP/MinecraftOTEL/commit/42b709e)), closes [#9](https://github.com/TheMeinerLP/MinecraftOTEL/issues/9)
+* docs(openspec): propose velocity metrics and version fix (#8) ([a4f7069](https://github.com/TheMeinerLP/MinecraftOTEL/commit/a4f7069)), closes [#8](https://github.com/TheMeinerLP/MinecraftOTEL/issues/8)
+
 ## <small>1.6.1 (2026-10-30)</small>
 
 * fix(velocity): start sampling and keep proxy gauges current (#7) ([b5b09b2](https://github.com/TheMeinerLP/MinecraftOTEL/commit/b5b09b2)), closes [#7](https://github.com/TheMeinerLP/MinecraftOTEL/issues/7)
