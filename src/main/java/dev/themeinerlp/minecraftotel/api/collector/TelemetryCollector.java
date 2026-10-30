@@ -1,6 +1,7 @@
 package dev.themeinerlp.minecraftotel.api.collector;
 
 import io.opentelemetry.api.common.Attributes;
+import java.util.Map;
 
 /**
  * Collector for turning telemetry samples into OpenTelemetry instruments.
@@ -87,5 +88,21 @@ public interface TelemetryCollector {
      */
     default void recordDoubleHistogram(String name, double value) {
         recordDoubleHistogram(name, value, null, Attributes.empty());
+    }
+
+    /**
+     * Replaces all series of a long gauge with the given values. Series that are absent from
+     * {@code values} are no longer exported. The default implementation records each entry through
+     * {@link #recordLongGauge(String, long, String, Attributes)} and cannot remove series.
+     *
+     * @param name metric name
+     * @param values gauge value per attribute set
+     * @param unit unit string or null for default
+     * @since 1.6.1
+     */
+    default void replaceLongGauge(String name, Map<Attributes, Long> values, String unit) {
+        for (Map.Entry<Attributes, Long> entry : values.entrySet()) {
+            recordLongGauge(name, entry.getValue(), unit, entry.getKey());
+        }
     }
 }

@@ -70,7 +70,6 @@ public final class VelocityTelemetryService implements TelemetryService {
         this.collector = new MeterTelemetryCollector(meter);
         this.snapshotSamplers = new CopyOnWriteArrayList<>();
         this.samplers = new CopyOnWriteArrayList<>();
-        this.samplers.add(new VelocityStandardSnapshotTelemetrySampler());
         this.listeners = new CopyOnWriteArrayList<>();
         this.state = new TelemetrySnapshotStore(VelocityTelemetrySnapshot.empty());
     }
@@ -91,6 +90,7 @@ public final class VelocityTelemetryService implements TelemetryService {
         );
         VelocitySnapshotSampler snapshotSampler = new VelocitySnapshotSampler(proxyServer, config);
         this.snapshotSamplers.add(snapshotSampler);
+        this.samplers.add(0, new VelocityStandardSnapshotTelemetrySampler(config.enableServerCount));
 
         sampleOnce();
         startSamplingTask();

@@ -6,12 +6,25 @@ import dev.themeinerlp.minecraftotel.api.sampler.TelemetrySampler;
 import dev.themeinerlp.minecraftotel.api.snapshot.TelemetrySnapshot;
 import dev.themeinerlp.minecraftotel.velocity.snapshot.VelocityTelemetrySnapshot;
 import io.opentelemetry.api.common.Attributes;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Emits standard MinecraftOTEL metrics for Velocity snapshots.
  */
 public final class VelocityStandardSnapshotTelemetrySampler implements TelemetrySampler {
+    private final boolean recordServerCount;
+
+    /**
+     * Creates a sampler for Velocity snapshots.
+     *
+     * @param recordServerCount whether to record the registered server count on every sample
+     * @since 1.6.1
+     */
+    public VelocityStandardSnapshotTelemetrySampler(boolean recordServerCount) {
+        this.recordServerCount = recordServerCount;
+    }
+
     @Override
     public void sample(TelemetrySnapshot snapshot, TelemetryCollector collector) {
         if (snapshot == null || collector == null) {
@@ -29,16 +42,13 @@ public final class VelocityStandardSnapshotTelemetrySampler implements Telemetry
                 Attributes.empty()
         );
 
-        for (Map.Entry<String, Long> entry : velocitySnapshot.playersByServer().entrySet()) {
-            collector.recordLongGauge(
-                    StandardMetrics.PROXY_PLAYERS_ONLINE,
-                    entry.getValue(),
-                    StandardMetrics.UNIT_COUNT,
-                    Attributes.of(StandardMetrics.SERVER_KEY, entry.getKey())
-            );
-        }
+        collector.replaceLongGauge(
+                StandardMetrics.PROXY_PLAYERS_ONLINE,
+                perServerValues(velocitySnapshot.playersByServer()),
+                StandardMetrics.UNIT_COUNT
+        );
 
-        if (!velocitySnapshot.playersByServer().isEmpty() || velocitySnapshot.registeredServers() > 0L) {
+        if (recordServerCount) {
             collector.recordLongGauge(
                     StandardMetrics.PROXY_SERVERS_REGISTERED,
                     velocitySnapshot.registeredServers(),
@@ -46,5 +56,13 @@ public final class VelocityStandardSnapshotTelemetrySampler implements Telemetry
                     Attributes.empty()
             );
         }
+    }
+
+    private static Map<Attributes, Long> perServerValues(Map<String, Long> playersByServer) {
+        Map<Attributes, Long> values = new HashMap<>();
+        for (Map.Entry<String, Long> entry : playersByServer.entrySet()) {
+            values.put(Attributes.of(StandardMetrics.SERVER_KEY, entry.getKey()), entry.getValue());
+        }
+        return values;
     }
 }
