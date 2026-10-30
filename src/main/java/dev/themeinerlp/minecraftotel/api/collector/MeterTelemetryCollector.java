@@ -40,6 +40,14 @@ public final class MeterTelemetryCollector implements TelemetryCollector {
     }
 
     @Override
+    public void replaceLongGauge(String name, Map<Attributes, Long> values, String unit) {
+        LongGaugeStore store = longGauges.computeIfAbsent(name, metricName ->
+                new LongGaugeStore(meter, metricName, unit)
+        );
+        store.replace(values);
+    }
+
+    @Override
     public void recordDoubleGauge(String name, double value, String unit, Attributes attributes) {
         Attributes attrs = attributes == null ? Attributes.empty() : attributes;
         DoubleGaugeStore store = doubleGauges.computeIfAbsent(name, metricName ->
@@ -92,6 +100,11 @@ public final class MeterTelemetryCollector implements TelemetryCollector {
 
         private void record(long value, Attributes attributes) {
             values.put(attributes, value);
+        }
+
+        private void replace(Map<Attributes, Long> newValues) {
+            values.keySet().retainAll(newValues.keySet());
+            values.putAll(newValues);
         }
     }
 

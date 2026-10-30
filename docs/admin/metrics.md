@@ -29,3 +29,7 @@ Chunk-level entity metrics are high-cardinality and disabled by default.
 - `minecraft.players.online` (gauge)
 - `minecraft.proxy.players.online` (gauge, attribute: `server`)
 - `minecraft.proxy.servers.registered` (gauge)
+
+`minecraft.proxy.players.online` only has series for backends that are registered at the latest
+sample; a removed backend's series disappears. `minecraft.proxy.servers.registered` is reported on
+every sample while `otel.enable.serverCount` is true, including a value of 0.

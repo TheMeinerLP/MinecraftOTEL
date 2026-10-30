@@ -43,11 +43,23 @@ dependencies {
     implementation(libs.opentelemetry.sdk.spi)
     implementation(libs.gson)
     compileOnly(libs.spark.api)
+
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.velocity.api)
+    testImplementation(libs.opentelemetry.sdk)
+    testImplementation(libs.opentelemetry.sdk.testing)
 }
 
 tasks {
     named("build") {
         dependsOn(shadowJar)
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
     supportedMinecraftVersions.forEach { serverVersion ->

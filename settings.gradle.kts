@@ -21,13 +21,21 @@ dependencyResolutionManagement {
             version("spark", "0.1-SNAPSHOT")
             version("velocity", "3.4.0-SNAPSHOT")
             version("gson", "2.11.0")
+            version("junit", "6.1.3")
+            version("mockito", "5.24.0")
 
             library("paper", "io.papermc.paper", "paper-api").versionRef("paper")
             library("opentelemetry.api", "io.opentelemetry", "opentelemetry-api").versionRef("opentelemetry")
+            library("opentelemetry.sdk", "io.opentelemetry", "opentelemetry-sdk").versionRef("opentelemetry")
+            library("opentelemetry.sdk.testing", "io.opentelemetry", "opentelemetry-sdk-testing").versionRef("opentelemetry")
             library("opentelemetry.sdk.spi", "io.opentelemetry", "opentelemetry-sdk-extension-autoconfigure-spi").versionRef("opentelemetry")
             library("spark.api", "me.lucko", "spark-api").versionRef("spark")
             library("velocity.api", "com.velocitypowered", "velocity-api").versionRef("velocity")
             library("gson", "com.google.code.gson", "gson").versionRef("gson")
+            library("junit.bom", "org.junit", "junit-bom").versionRef("junit")
+            library("junit.jupiter", "org.junit.jupiter", "junit-jupiter").withoutVersion()
+            library("junit.platform.launcher", "org.junit.platform", "junit-platform-launcher").withoutVersion()
+            library("mockito.core", "org.mockito", "mockito-core").versionRef("mockito")
 
 
             plugin("paper.yml", "net.minecrell.plugin-yml.paper").versionRef("paper.yml")

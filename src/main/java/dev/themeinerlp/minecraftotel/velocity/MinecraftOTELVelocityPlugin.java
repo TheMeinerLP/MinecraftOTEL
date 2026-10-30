@@ -38,6 +38,7 @@ public final class MinecraftOTELVelocityPlugin {
     public void onProxyInitialize(ProxyInitializeEvent event) {
         String version = resolveVersion();
         telemetryService = new VelocityTelemetryService(
+                this,
                 proxyServer,
                 logger,
                 dataDirectory,
