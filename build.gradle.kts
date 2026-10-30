@@ -77,6 +77,9 @@ tasks {
         relocate("org.bstats", "dev.themeinerlp.minecraftotel.org.bstats")
         relocate("com.google.gson", "dev.themeinerlp.minecraftotel.libs.gson")
         archiveFileName.set("MinecraftOTEL.jar")
+        manifest {
+            attributes("Implementation-Version" to project.version)
+        }
         dependsOn(jar)
     }
 
