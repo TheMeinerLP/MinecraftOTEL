@@ -1,3 +1,7 @@
+## <small>1.7.1 (2026-10-31)</small>
+
+* fix(dashboard): aggregate backend panels per server (#12) ([d8e52ef](https://github.com/TheMeinerLP/MinecraftOTEL/commit/d8e52ef)), closes [#12](https://github.com/TheMeinerLP/MinecraftOTEL/issues/12)
+
 ## 1.7.0 (2026-10-30)
 
 * feat(velocity): add network, session and backend metrics (#11) ([283d947](https://github.com/TheMeinerLP/MinecraftOTEL/commit/283d947)), closes [#11](https://github.com/TheMeinerLP/MinecraftOTEL/issues/11)
