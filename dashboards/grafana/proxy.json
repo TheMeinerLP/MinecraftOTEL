@@ -1074,7 +1074,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "minecraft_proxy_server_up_ratio{job=~\"$job\"}",
+          "expr": "min by (server) (minecraft_proxy_server_up_ratio{job=~\"$job\"})",
           "legendFormat": "{{server}}",
           "range": true,
           "refId": "A"
@@ -1166,7 +1166,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "minecraft_proxy_server_latency_milliseconds{job=~\"$job\"}",
+          "expr": "max by (server) (minecraft_proxy_server_latency_milliseconds{job=~\"$job\"})",
           "legendFormat": "{{server}}",
           "range": true,
           "refId": "A"
